@@ -98,3 +98,34 @@ The middleware adds a per-request nonce Content Security Policy, same-origin che
 7. Run dependency audit, production build, database RLS tests and provider webhook replay/tampering tests before public launch.
 
 This hardening is an implementation baseline, not a certification or a guarantee of zero vulnerabilities. Production launch still requires the external secrets, provider dashboards, HTTPS/TLS edge settings, database migration, and live end-to-end security tests above.
+
+
+## SakanVIP architecture adaptation: payments, invoices, contact and CJ
+
+The following Next.js App Router endpoints are now implemented in this repository:
+
+- `POST /api/contact` — Zod-validated contact form; sends to `info@digital-future.ai` and `server@digital-future.ai` through UDAG SMTP.
+- `POST /api/payments/stripe/session` — authenticated Stripe Checkout Session; product prices, inventory and variants are re-read from Supabase on the server.
+- `POST /api/payments/paypal/order` — authenticated PayPal Orders v2 creation using server-calculated cart totals.
+- `POST /api/payments/paypal/capture` — authenticated, ownership-checked capture; verifies capture amount/currency against the stored order.
+- `POST /api/payments/stripe/webhook` — verifies the raw Stripe signature, reconciles Checkout Session payment, finalizes the order, creates a PDF invoice and sends it to the customer and shop.
+- `POST /api/webhooks/paypal` — verifies PayPal's webhook signature through PayPal's verification API, reconciles completed captures and sends the invoice.
+- `GET /api/cj/status` and `POST /api/cj/read-tool` — CJ MCP read-only tools protected by `CJ_MCP_ADMIN_TOKEN`.
+- `GET /health` — root health endpoint; `GET /api/health` is also available.
+
+The new `202611060004_orders_invoices.sql` migration adds invoice metadata and the atomic `finalize_paid_order` RPC. Invoice IDs use `HM-YYYY-00001` numbering. The yearly counter is updated inside the same database transaction as order finalization, so a rolled-back transaction does not consume an invoice number. Apply migrations 001, 003, then 004 in order.
+
+PDF invoices are generated server-side with Helpmey seller details and § 19 UStG wording, then mailed as attachments. The application sender defaults to `server@digital-future.ai`; contact enquiries are sent to both official inboxes.
+
+### New backend secrets
+
+Set these only in the hosting provider's encrypted secret store; do not commit real values:
+
+- `SMTP_HOST=smtps.udag.de`, `SMTP_PORT=465`, `SMTP_SECURE=true`, `SMTP_USER=server@digital-future.ai`, `SMTP_PASS`, `SMTP_FROM`.
+- `PAYPAL_API_BASE=https://api-m.sandbox.paypal.com` for sandbox; use `https://api-m.paypal.com` only after live tests.
+- `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, and `PAYPAL_WEBHOOK_ID`.
+- `CJ_MCP_TOKEN` and a long random `CJ_MCP_ADMIN_TOKEN`.
+- `APP_ORIGIN` must be the canonical HTTPS origin.
+- `NEXT_PUBLIC_INFO_EMAIL` and `NEXT_PUBLIC_SERVER_EMAIL` are public recipient addresses only, never credentials.
+
+Install dependencies from `backend/package.json` (includes `pdf-lib` and the official MCP SDK). The example environment file contains names and safe example values only. The real SMTP password, provider keys, Supabase service-role key and CJ tokens must be entered in host secrets, never GitHub.
