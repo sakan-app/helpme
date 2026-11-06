@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { verifySmtpConnection } from "@/lib/mailer";
 
@@ -8,7 +9,7 @@ export async function POST(request: Request) {
   const token = process.env.SMTP_TEST_TOKEN;
   const supplied = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
   if (!token || !supplied || supplied.length !== token.length ||
-      !crypto.timingSafeEqual(Buffer.from(supplied), Buffer.from(token))) {
+      !timingSafeEqual(Buffer.from(supplied), Buffer.from(token))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
