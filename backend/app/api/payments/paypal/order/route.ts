@@ -70,7 +70,7 @@ export async function POST(request: Request) {
       method: "POST", headers: { Authorization: "Bearer " + token, "Content-Type": "application/json", "PayPal-Request-Id": order.id },
       body: JSON.stringify({
         intent: "CAPTURE",
-        purchase_units: [{ reference_id: order.id, custom_id: order.id, invoice_id: "HM-" + order.id, amount: { currency_code: currency, value: (totalCents / 100).toFixed(2) }, description: "Helpmey Bestellung" }],
+        purchase_units: [{ reference_id: order.id, custom_id: order.id, invoice_id: "HM-" + order.id, amount: { currency_code: currency, value: (totalCents / 100).toFixed(2) }, shipping: { name: { full_name: parsed.data.shipping.name }, address: { address_line_1: parsed.data.shipping.street, admin_area_2: parsed.data.shipping.city, postal_code: parsed.data.shipping.postalCode, country_code: parsed.data.shipping.country } }, description: "Helpmey Bestellung" }],
         payment_source: { paypal: { experience_context: { return_url: origin + "/checkout/success?provider=paypal", cancel_url: origin + "/checkout/cancel", user_action: "PAY_NOW" } } }
       }), cache: "no-store"
     });
