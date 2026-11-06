@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return NextResponse.json({ error: "Nicht angemeldet." }, { status: 401 });
   const admin = createSupabaseAdminClient();
-  const { data: order, error } = await admin.from("orders").select("id,user_id,total,currency,status,provider_reference,risk_score").eq("id", parsed.data.orderId).eq("user_id", auth.user.id).single();
+  const { data: order, error } = await admin.from("orders").select("id,user_id,total,currency,status,provider_reference,risk_score,shipping_address").eq("id", parsed.data.orderId).eq("user_id", auth.user.id).single();
   if (error || !order || order.provider_reference !== parsed.data.paypalOrderId || !["pending","pending_review"].includes(order.status)) return NextResponse.json({ error: "Bestellung nicht gefunden oder nicht zahlbar." }, { status: 404 });
   try {
     const { token, base } = await paypalToken();
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
       p_order_id: order.id, p_provider: "paypal", p_payment_reference: capture.id,
       p_customer_name: auth.user.user_metadata?.full_name || auth.user.email || "Helpmey Kunde",
       p_customer_email: auth.user.email || "", p_customer_phone: null,
-      p_shipping_address: null, p_billing_address: null
+      p_shipping_address: order.shipping_address, p_billing_address: null
     });
     if (finalizeError) throw new Error("Order finalization failed.");
     await emailPaidOrderInvoice(order.id);
