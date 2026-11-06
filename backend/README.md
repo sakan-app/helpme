@@ -89,7 +89,7 @@ The middleware adds a per-request nonce Content Security Policy, same-origin che
 
 ### Operational launch checklist
 
-1. Apply all three SQL migrations in order.
+1. Apply both available SQL migrations in order: `202611060001_initial_store.sql`, then `202611060003_security_hardening.sql`.
 2. Configure and test Upstash Redis; do not deploy critical routes without it.
 3. Set a fresh `DATA_ENCRYPTION_KEY`, Supabase URL/anon/service-role keys and exact HTTPS `APP_ORIGIN` in host secrets.
 4. Configure Stripe webhook signing secret and test payment-intent success/failure events in test mode.
