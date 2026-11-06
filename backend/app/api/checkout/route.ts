@@ -61,6 +61,9 @@ export async function POST(request: Request) {
     if (Number(product.inventory) < (quantities.get(product.id) ?? quantity)) throw new Error("Insufficient stock.");
     return { product_id: product.id, product_title: product.title, quantity, unit_price: Number(product.price), selected_size: item.size ?? null, selected_color: item.color ?? null };
   });
+  } catch {
+    return NextResponse.json({ error: "Produktvariante oder Lagerbestand ist nicht verfügbar." }, { status: 409 });
+  }
   if (ids.length !== parsed.data.items.length) {
     return NextResponse.json({ error: "Ungültige Warenkorbposition." }, { status: 400 });
   }
