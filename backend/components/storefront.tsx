@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
-import type { User } from "@supabase/supabase-js";
+type User = { id: string; email?: string };
 import { Heart, Search, ShoppingBag, UserRound, X, Plus, Minus, Globe, Menu, Crown, ArrowRight, ShieldCheck, Mail } from "lucide-react";
 
 type Product = { id: string; category: string; title: string; description: string; price: number; symbol: string; sizes: string[]; colors: string[]; imageUrl?: string | null; currency?: string };
@@ -52,14 +51,12 @@ export default function Storefront() {
   useEffect(() => {
     setCart(loadJson<CartLine[]>("helpmey_cart_v1",[]));
     setWishlist(loadJson<string[]>("helpmey_wishlist_v1",[]));
-    try {
-      const supabase = createSupabaseBrowserClient();
-      supabase.auth.getUser().then(({data})=>setUser(data.user));
-      const {data:{subscription}} = supabase.auth.onAuthStateChange((_event,session)=>setUser(session?.user ?? null));
-      return () => subscription.unsubscribe();
-    } catch {
-      setAuthMessage("Die Kontofunktion wird nach Konfiguration der Supabase-Umgebungsvariablen aktiviert.");
-    }
+    let cancelled = false;
+    fetch("/api/auth/user", { cache: "no-store" })
+      .then(async (response) => response.ok ? response.json() : { user: null })
+      .then((payload) => { if (!cancelled) setUser(payload.user ?? null); })
+      .catch(() => { if (!cancelled) setUser(null); });
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(()=>{ let cancelled=false; fetch("/api/catalog",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(new Error("catalog unavailable"))).then(payload=>{ if(!cancelled && Array.isArray(payload.products) && payload.products.length){ setCatalog(payload.products.map((p: Omit<Product,"symbol">)=>({...p,symbol:"✧"}))); } }).catch(()=>{}); return ()=>{cancelled=true}; },[]);
@@ -80,22 +77,30 @@ export default function Storefront() {
   async function submitAuth(event:FormEvent<HTMLFormElement>) {
     event.preventDefault();setBusy(true);setAuthMessage("");
     try {
-      const supabase=createSupabaseBrowserClient();
-      if(authMode==="signup") {
-        const {data,error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:window.location.origin+"/auth/callback"}});
-        if(error) throw error;
-        setAuthMessage(data.session?"Konto erstellt. Sie sind angemeldet.":"Bitte bestätigen Sie Ihre E-Mail über den zugesandten Aktivierungslink.");
-      } else if(authMode==="login") {
-        const {error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;
-        setAuthMessage("Erfolgreich angemeldet.");setModal(null);
+      const endpoint = authMode === "signup" ? "/api/auth/signup" : authMode === "login" ? "/api/auth/login" : "/api/auth/forgot-password";
+      const response = await fetch(endpoint, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(authMode === "reset" ? { email } : { email, password })
+      });
+      const payload = await response.json().catch(() => ({})) as { error?: string; message?: string; user?: User | null };
+      if (!response.ok) throw new Error(payload.error ?? "Die Anfrage konnte nicht verarbeitet werden.");
+      if (authMode === "login" && payload.user) {
+        setUser(payload.user);setAuthMessage("Erfolgreich angemeldet.");setModal(null);
+      } else if (authMode === "signup") {
+        setAuthMessage(payload.message ?? "Bitte bestätigen Sie Ihre E-Mail-Adresse.");
       } else {
-        const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+"/auth/callback?next=/account/reset-password"});if(error)throw error;
-        setAuthMessage("Wenn ein Konto existiert, wurde eine Anleitung zum Zurücksetzen versendet.");
+        setAuthMessage(payload.message ?? "Wenn ein Konto existiert, wurde eine Anleitung versendet.");
       }
     } catch(error) { setAuthMessage(error instanceof Error?error.message:"Die Anfrage konnte nicht verarbeitet werden."); }
     finally { setBusy(false); }
   }
-  async function signOut() { try { const supabase=createSupabaseBrowserClient();await supabase.auth.signOut();setUser(null);setAuthMessage("Sie wurden abgemeldet."); } catch { setAuthMessage("Abmeldung nicht verfügbar."); } }
+  async function signOut() {
+    try {
+      const response = await fetch("/api/auth/logout", { method: "POST" });
+      if (!response.ok) throw new Error("Logout failed");
+      setUser(null);setAuthMessage("Sie wurden abgemeldet.");
+    } catch { setAuthMessage("Abmeldung nicht verfügbar."); }
+  }
   async function subscribe(event:FormEvent<HTMLFormElement>) { event.preventDefault();setAuthMessage("Newsletter-Anmeldung benötigt noch einen verbundenen Newsletter-Anbieter."); }
 
   return <div dir={isRtl?"rtl":"ltr"}>
