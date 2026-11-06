@@ -1,38 +1,58 @@
-# Helpmey authentication and mail backend
+# Helpmey — Next.js 15 Luxury Storefront
 
-This is a separate Next.js backend scaffold. The current storefront at the repository root is a static GitHub Pages site; GitHub Pages cannot execute these API routes. Deploy this directory as a Node.js/Next.js service (Node 20+) before connecting the storefront.
+The production application lives in `backend/`. It uses Next.js 15 App Router, React 19, TypeScript, Tailwind CSS v4, Supabase Auth and PostgreSQL. The legacy static storefront at the repository root remains separate.
 
-## Authentication
+## Run locally
 
-The API uses Supabase Auth and cookie-based sessions through `@supabase/ssr`:
-- `POST /api/auth/signup` — email/password registration; Supabase sends confirmation.
-- `POST /api/auth/login` — password login; session cookies are written by Supabase SSR.
-- `POST /api/auth/logout` — revoke session.
-- `POST /api/auth/forgot-password` — send recovery link.
-- `GET /api/auth/user` — resolve the authenticated user server-side.
+1. Use Node.js 20 or newer.
+2. From `backend/`, install dependencies with `npm install`.
+3. Copy `.env.example` to `.env.local` and enter the Supabase project URL and anon key. Never commit `.env.local`.
+4. Run `npm run dev`; run `npm run typecheck` and `npm run build` before deployment.
 
-Enable email confirmations in Supabase Auth settings. Set the site URL and allowed redirect URLs to the deployed backend origin and `/auth/callback`. Configure Supabase Auth's **Custom SMTP** in the Supabase Dashboard using the same domain SMTP mailbox; Supabase Auth confirmation and recovery templates are sent by Supabase Auth, not by Nodemailer.
+## Environment
 
-## Official SMTP
+Required:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `APP_ORIGIN` / `NEXT_PUBLIC_SITE_URL` set to the deployed backend origin.
 
-Nodemailer transport is in `lib/mailer.ts`. It supports:
-- `smtps.udag.de:465` with implicit TLS (`SMTP_SECURE=true`).
-- `smtps.udag.de:587` with STARTTLS (`SMTP_SECURE=false`, `requireTLS=true`).
+Optional direct PostgreSQL URLs:
+- `DATABASE_URL`
+- `DIRECT_URL`
 
-TLS 1.2 minimum and certificate verification are required. Set `SMTP_USER` and `SMTP_PASSWORD` in the hosting provider's encrypted secret manager. Do not put mailbox passwords in Git, client JavaScript, Supabase public variables, or issue comments. The provided server mailbox is the default sender; contact and info addresses are reply-to/notification identities and must be provisioned/authorized by the mail host before use.
+SMTP:
+- `SMTP_HOST=smtps.udag.de`
+- `SMTP_PORT=465`, `SMTP_SECURE=true` (implicit TLS), or port 587 with STARTTLS.
+- `SMTP_USER=contact@digital-future.ai`
+- `SMTP_PASS` is the mailbox password and belongs only in the host's encrypted secret store.
+- `SMTP_FROM=Helpmey <contact@digital-future.ai>`
 
-`verifySmtpConnection()` performs an actual SMTP handshake and authentication check when called from a protected server-side deployment check. No SMTP verification can be claimed until valid credentials are configured and this function succeeds.
+Nodemailer enforces TLS 1.2+, certificate validation, and SMTP authentication. The protected `POST /api/internal/smtp-check` route performs a real connection/authentication test only when `SMTP_TEST_TOKEN` is configured.
 
-## Deploy
+## Supabase Auth email delivery
 
-1. Create a Supabase project; apply its Auth email confirmation and password recovery settings.
-2. Deploy this `backend/` directory as a Next.js app with Node 20+.
-3. Configure every variable in `.env.example` in the host's secret manager. Never commit a real `.env`.
-4. In Supabase Dashboard → Authentication → SMTP Settings, enable custom SMTP with host `smtps.udag.de`, port `465`, username and mailbox password, sender name/address. Use port 587 only if your provider requires STARTTLS.
-5. Add the deployed callback URL to Supabase redirect allow-list.
-6. Connect the static storefront's account modal to this backend origin using same-site deployment or a carefully configured HTTPS origin/CORS policy. Do not collect passwords in the static page before this connection is complete.
-7. Before sending order confirmations, call `sendOrderConfirmation` only after a verified payment webhook and durable order creation. Never send an order-paid email based on a browser redirect.
+The browser storefront uses Supabase Auth for signup, login, logout, and password recovery. To route confirmation and recovery emails through the official domain mailbox, enable **Custom SMTP** in Supabase Dashboard → Authentication → SMTP Settings:
+- Host: `smtps.udag.de`
+- Port: `465`
+- Username: `contact@digital-future.ai`
+- Password: set the real mailbox password in the Supabase dashboard secret field.
+- Sender email: `contact@digital-future.ai`
+- Sender name: `Helpmey`
 
-## Current status
+Configure the Supabase Site URL and redirect allow-list to include the deployed origin and `/auth/callback`. Supabase Auth sends its own confirmation/recovery messages using its configured SMTP provider; the Nodemailer transport is for application-side transactional messages. Do not assume SMTP works until a live test succeeds.
 
-The routes and SMTP transport are committed as source code only. They are not running on GitHub Pages. Supabase project values, SMTP mailbox password, sender authorization, deployment origin, and end-to-end tests are still required.
+## Hero image
+
+Place the supplied, original, uncropped palace image at `backend/public/helpmey-palace-hero.jpg`. The homepage references this exact path and uses intrinsic sizing with `object-fit: contain`; it does not crop the image. The binary image is not generated by the source-code commit.
+
+## Database
+
+Apply SQL migrations in `supabase/migrations/` to your Supabase project. Row-level security is enabled. Product catalogue reads are public; wishlist rows are private to the authenticated owner; order rows are not client-insertable.
+
+## Deployment
+
+Deploy the `backend/` directory as the project root in a Node.js host such as Vercel. Set all environment values in the host's encrypted environment settings. Do not deploy this Next.js app as GitHub Pages: GitHub Pages cannot execute Next.js API routes or server-side authentication.
+
+## Scope and launch status
+
+The storefront includes the four requested sample products, category/search filtering, variant selection, local cart and wishlist state, multilingual UI labels, and Supabase account UI. Payment is deliberately not represented as live: a real checkout requires a payment provider account, server-side order creation, verified webhooks, tax/shipping configuration and end-to-end testing. CJ Dropshipping also requires supplier credentials and a server-side sync job before inventory/prices can be live. Legal text is a draft and must be reviewed against the actual business details and current German/EU law before publication.
