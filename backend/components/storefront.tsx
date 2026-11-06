@@ -31,7 +31,8 @@ export default function Storefront() {
   const [language,setLanguage] = useState<Language>("DE");
   const [query,setQuery] = useState("");
   const [category,setCategory] = useState("Alle");
-  const [catalog,setCatalog] = useState<Product[]>(products);\n  const [cart,setCart] = useState<CartLine[]>([]);
+  const [catalog,setCatalog] = useState<Product[]>(products);
+  const [cart,setCart] = useState<CartLine[]>([]);
   const [wishlist,setWishlist] = useState<string[]>([]);
   const [user,setUser] = useState<User|null>(null);
   const [modal,setModal] = useState<"auth"|"cart"|"product"|"wishlist"|"legal"|null>(null);
@@ -61,7 +62,8 @@ export default function Storefront() {
     }
   }, []);
 
-  useEffect(()=>{ let cancelled=false; fetch("/api/catalog",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(new Error("catalog unavailable"))).then(payload=>{ if(!cancelled && Array.isArray(payload.products) && payload.products.length){ setCatalog(payload.products.map((p: Omit<Product,"symbol">)=>({...p,symbol:"✧"}))); } }).catch(()=>{}); return ()=>{cancelled=true}; },[]);\n  useEffect(()=>{ try { localStorage.setItem("helpmey_cart_v1",JSON.stringify(cart)); } catch {} },[cart]);
+  useEffect(()=>{ let cancelled=false; fetch("/api/catalog",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(new Error("catalog unavailable"))).then(payload=>{ if(!cancelled && Array.isArray(payload.products) && payload.products.length){ setCatalog(payload.products.map((p: Omit<Product,"symbol">)=>({...p,symbol:"✧"}))); } }).catch(()=>{}); return ()=>{cancelled=true}; },[]);
+  useEffect(()=>{ try { localStorage.setItem("helpmey_cart_v1",JSON.stringify(cart)); } catch {} },[cart]);
   useEffect(()=>{ try { localStorage.setItem("helpmey_wishlist_v1",JSON.stringify(wishlist)); } catch {} },[wishlist]);
 
   const visibleProducts = useMemo(()=>catalog.filter(p=>(category==="Alle"||p.category.toLowerCase().includes(category.toLowerCase())) && (p.title+" "+p.category+" "+p.description).toLowerCase().includes(query.toLowerCase())),[catalog,category,query]);
