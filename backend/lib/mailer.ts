@@ -33,7 +33,7 @@ export async function verifySmtpConnection(): Promise<void> {
 }
 
 export async function sendTransactionalMail(options: Omit<SendMailOptions, "from"> & { from?: string }) {
-  const from = options.from ?? process.env.SMTP_FROM ?? "Helpmey <contact@digital-future.ai>";
+  const from = options.from ?? process.env.SMTP_FROM ?? "Helpmey <server@digital-future.ai>";
   return getTransport().sendMail({ ...options, from });
 }
 
