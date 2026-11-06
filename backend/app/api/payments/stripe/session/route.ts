@@ -68,7 +68,7 @@ export async function POST(request: Request) {
     const stripe = new Stripe(stripeKey);
     const session = await stripe.checkout.sessions.create({
       mode: "payment", customer_email: auth.user.email,
-      line_items: lines.map((line) => ({ quantity: line.quantity, price_data: { currency, unit_amount: Math.round(line.unit_price * 100), product_data: { name: line.product_title } } })),
+      line_items: [...lines.map((line) => ({ quantity: line.quantity, price_data: { currency, unit_amount: Math.round(line.unit_price * 100), product_data: { name: line.product_title } } })), ...(shipping > 0 ? [{ quantity: 1, price_data: { currency, unit_amount: shipping, product_data: { name: "Versand" } } }] : [])],
       shipping_address_collection: { allowed_countries: ["DE","AT","BE","BG","HR","CY","CZ","DK","EE","ES","FI","FR","GR","HU","IE","IT","LV","LT","LU","MT","NL","PL","PT","RO","SK","SI","SE"] },
       metadata: { order_id: order.id, user_id: auth.user.id, shop: "helpmey" },
       success_url: (process.env.APP_ORIGIN || new URL(request.url).origin) + "/checkout/success?session_id={CHECKOUT_SESSION_ID}",
