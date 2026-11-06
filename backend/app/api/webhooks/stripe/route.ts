@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       } else {
         const expected = Math.round(Number(order.total) * 100);
         const amountMatches = intent.amount_received === expected &&
-          intent.currency.toUpperCase() === String(order.currency).toLowerCase();
+          intent.currency.toUpperCase() === String(order.currency).toUpperCase();
         let cvcCheck: "pass" | "fail" | "unavailable" | null = null;
         let avsPostalMatch: boolean | null = null;
         let providerRiskHigh = false;
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
           const checks = charge.payment_method_details?.card?.checks;
           cvcCheck = checks?.cvc_check === "pass" ? "pass" : checks?.cvc_check === "fail" ? "fail" : "unavailable";
           avsPostalMatch = checks?.address_postal_code_check === "fail" ? false : checks?.address_postal_code_check === "pass" ? true : null;
-          providerRiskHigh = charge.outcome?.risk_level === "highest" || charge.outcome?.risk_level === "high";
+          providerRiskHigh = String(charge.outcome?.risk_level ?? "").toLowerCase().includes("high");
         }
         const scored = scorePaymentRisk({
           amountCents: expected,
