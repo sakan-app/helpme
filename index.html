@@ -251,10 +251,10 @@ function translate(){document.documentElement.lang=lang;document.documentElement
 function saveCart(){try{localStorage.setItem(stateKey,JSON.stringify(cart))}catch(e){}$('#cartCount').textContent=cart.reduce((n,x)=>n+x.qty,0)}
 function money(n){return new Intl.NumberFormat(lang==='de'?'de-DE':lang+'-'+({en:'GB',fr:'FR',it:'IT',es:'ES',ar:'SA',tr:'TR',ru:'RU',nl:'NL',zh:'CN'}[lang]||'DE'),{style:'currency',currency:'EUR'}).format(n)}
 function go(v){view=v;if(v==='women')category=womenCats[0];if(v==='men')category=menCats[0];if(v==='phones')phoneBrand='Apple';renderView();$('#catalog').scrollIntoView({behavior:'smooth',block:'start'})}
-function titleForView(){return view==='women'?t('womenTitle'):view==='men'?t('menTitle'):t('phonesTitle')}
+function titleForView(){return view==='home'?'Alltagsstücke, mit Bedacht gefertigt.':view==='women'?t('womenTitle'):view==='men'?t('menTitle'):t('phonesTitle')}
 function renderView(){
- $('#catalogTitle').textContent=titleForView();$('#catalogDescription').textContent=view==='women'?t('womenDesc'):view==='men'?t('menDesc'):t('phonesDesc');
- $('#catalogEyebrow').textContent=view==='phones'?'PHONE ACCESSORIES':view.toUpperCase()+' VIP COLLECTION';
+ $('#catalogTitle').textContent=titleForView();$('#catalogDescription').textContent=view==='home'?'Zeitlose Essentials aus Naturfasern, ehrlicher Keramik und ausgewählten Accessoires – gemacht für mehr als eine Saison.':view==='women'?t('womenDesc'):view==='men'?t('menDesc'):t('phonesDesc');
+ $('#catalogEyebrow').textContent=view==='home'?'HELPMEY · EVERYDAY STORE':view==='phones'?'PHONE ACCESSORIES':view.toUpperCase()+' VIP COLLECTION';
  const tabs=$('#categoryTabs'),brandGrid=$('#brandGrid'),grid=$('#productGrid');tabs.innerHTML='';brandGrid.hidden=true;grid.hidden=false;
  if(view==='home'){tabs.innerHTML='';}
  if(view==='phones'&&phoneBrand===''){tabs.innerHTML='';}
