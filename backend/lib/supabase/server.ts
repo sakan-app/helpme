@@ -1,6 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
+type CookieOptions = Parameters<Awaited<ReturnType<typeof cookies>>["set"]>[2];
+type CookieUpdate = { name: string; value: string; options?: CookieOptions };
+
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies();
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -12,11 +15,9 @@ export async function createSupabaseServerClient() {
       getAll() {
         return cookieStore.getAll();
       },
-      setAll(cookiesToSet) {
+      setAll(cookiesToSet: CookieUpdate[]) {
         try {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          );
+          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
         } catch {
           // Server Components cannot write cookies; Route Handlers can.
         }
