@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 export default function ResetPasswordPage() {
   const [password,setPassword] = useState("");
@@ -13,9 +12,11 @@ export default function ResetPasswordPage() {
     setBusy(true);
     setMessage("");
     try {
-      const supabase = createSupabaseBrowserClient();
-      const { error } = await supabase.auth.updateUser({ password });
-      if (error) throw error;
+      const response = await fetch("/api/auth/update-password", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password })
+      });
+      const payload = await response.json().catch(() => ({})) as { error?: string };
+      if (!response.ok) throw new Error(payload.error ?? "Das Passwort konnte nicht aktualisiert werden.");
       setMessage("Ihr Passwort wurde aktualisiert. Sie können sich jetzt im Helpmey-Shop anmelden.");
       setPassword("");
     } catch (error) {
