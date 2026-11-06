@@ -5,7 +5,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import type { User } from "@supabase/supabase-js";
 import { Heart, Search, ShoppingBag, UserRound, X, Plus, Minus, Globe, Menu, Crown, ArrowRight, ShieldCheck, Mail } from "lucide-react";
 
-type Product = { id: string; category: string; title: string; description: string; price: number; symbol: string; sizes: string[]; colors: string[] };
+type Product = { id: string; category: string; title: string; description: string; price: number; symbol: string; sizes: string[]; colors: string[]; imageUrl?: string | null; currency?: string };
 type CartLine = { key: string; product: Product; size: string; color: string; quantity: number };
 type Language = "DE" | "EN" | "AR" | "FR" | "ES" | "IT" | "TR" | "NL";
 const products: Product[] = [
@@ -31,7 +31,7 @@ export default function Storefront() {
   const [language,setLanguage] = useState<Language>("DE");
   const [query,setQuery] = useState("");
   const [category,setCategory] = useState("Alle");
-  const [cart,setCart] = useState<CartLine[]>([]);
+  const [catalog,setCatalog] = useState<Product[]>(products);\n  const [cart,setCart] = useState<CartLine[]>([]);
   const [wishlist,setWishlist] = useState<string[]>([]);
   const [user,setUser] = useState<User|null>(null);
   const [modal,setModal] = useState<"auth"|"cart"|"product"|"wishlist"|"legal"|null>(null);
@@ -61,10 +61,10 @@ export default function Storefront() {
     }
   }, []);
 
-  useEffect(()=>{ try { localStorage.setItem("helpmey_cart_v1",JSON.stringify(cart)); } catch {} },[cart]);
+  useEffect(()=>{ let cancelled=false; fetch("/api/catalog",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(new Error("catalog unavailable"))).then(payload=>{ if(!cancelled && Array.isArray(payload.products) && payload.products.length){ setCatalog(payload.products.map((p: Omit<Product,"symbol">)=>({...p,symbol:"✧"}))); } }).catch(()=>{}); return ()=>{cancelled=true}; },[]);\n  useEffect(()=>{ try { localStorage.setItem("helpmey_cart_v1",JSON.stringify(cart)); } catch {} },[cart]);
   useEffect(()=>{ try { localStorage.setItem("helpmey_wishlist_v1",JSON.stringify(wishlist)); } catch {} },[wishlist]);
 
-  const visibleProducts = useMemo(()=>products.filter(p=>(category==="Alle"||p.category.toLowerCase().includes(category.toLowerCase())) && (p.title+" "+p.category+" "+p.description).toLowerCase().includes(query.toLowerCase())),[category,query]);
+  const visibleProducts = useMemo(()=>catalog.filter(p=>(category==="Alle"||p.category.toLowerCase().includes(category.toLowerCase())) && (p.title+" "+p.category+" "+p.description).toLowerCase().includes(query.toLowerCase())),[catalog,category,query]);
   const cartCount = cart.reduce((sum,line)=>sum+line.quantity,0);
   const subtotal = cart.reduce((sum,line)=>sum+line.product.price*line.quantity,0);
 
@@ -130,7 +130,7 @@ export default function Storefront() {
         <div className="section-heading"><div><div className="eyebrow">Curated everyday luxury</div><h2>{t.featured}</h2></div><p>{t.featuredText}</p></div>
         <div className="mb-5 flex flex-wrap items-center gap-3"><label className="relative flex min-w-[220px] flex-1 items-center"><Search size={15} className="absolute left-3 text-[#c5a880]"/><input className="field pl-9" placeholder={t.search} value={query} onChange={e=>setQuery(e.target.value)}/></label><div className="category-row !mb-0">{["Alle","Sportbekleidung","Taschen","Uhren","Geschenke"].map(c=><button key={c} className="category-chip" aria-pressed={category===c} onClick={()=>setCategory(c)}>{c}</button>)}</div></div>
         <div className="product-grid">{visibleProducts.map(product=><article className="product-card" key={product.id}>
-          <div className="product-photo"><span className="product-placeholder">{product.symbol}</span><span className="product-badge">BESTSELLER</span><button className="wish-button" aria-label="Zur Merkliste" aria-pressed={wishlist.includes(product.id)} onClick={()=>toggleWishlist(product.id)}><Heart size={16} fill={wishlist.includes(product.id)?"currentColor":"none"}/></button></div>
+          <div className="product-photo">{product.imageUrl?<img src={product.imageUrl} alt={product.title} loading="lazy"/>:<span className="product-placeholder">{product.symbol}</span>}<span className="product-badge">BESTSELLER</span><button className="wish-button" aria-label="Zur Merkliste" aria-pressed={wishlist.includes(product.id)} onClick={()=>toggleWishlist(product.id)}><Heart size={16} fill={wishlist.includes(product.id)?"currentColor":"none"}/></button></div>
           <div className="product-info"><div className="product-category">{product.category}</div><h3>{product.title}</h3><p>{product.description}</p><div className="product-buy"><span className="product-price">{euro(product.price)}</span><button className="small-add" onClick={()=>openProduct(product)}><Plus size={13}/>{t.add}</button></div></div>
         </article>)}</div>
       </section>
