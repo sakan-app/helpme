@@ -41,13 +41,16 @@ export async function POST(request: Request) {
           intent.currency.toUpperCase() === String(order.currency).toUpperCase();
         let cvcCheck: "pass" | "fail" | "unavailable" | null = null;
         let avsPostalMatch: boolean | null = null;
-        let providerRiskHigh = false;\n        let providerRiskScore = 0;
+        let providerRiskHigh = false;
+        let providerRiskScore = 0;
         if (typeof intent.latest_charge === "string") {
           const charge = await stripe.charges.retrieve(intent.latest_charge);
           const checks = charge.payment_method_details?.card?.checks;
           cvcCheck = checks?.cvc_check === "pass" ? "pass" : checks?.cvc_check === "fail" ? "fail" : "unavailable";
           avsPostalMatch = checks?.address_postal_code_check === "fail" ? false : checks?.address_postal_code_check === "pass" ? true : null;
-          const radarLevel = String(charge.outcome?.risk_level ?? "").toLowerCase();\n          providerRiskScore = radarLevel === "highest" ? 80 : radarLevel === "elevated" ? 50 : 0;\n          providerRiskHigh = providerRiskScore > 0;
+          const radarLevel = String(charge.outcome?.risk_level ?? "").toLowerCase();
+          providerRiskScore = radarLevel === "highest" ? 80 : radarLevel === "elevated" ? 50 : 0;
+          providerRiskHigh = providerRiskScore > 0;
         }
         const scored = scorePaymentRisk({
           amountCents: expected,
