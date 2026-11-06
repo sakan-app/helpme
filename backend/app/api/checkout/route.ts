@@ -56,10 +56,10 @@ export async function POST(request: Request) {
     if (item.size && sizes.length && !sizes.includes(item.size)) throw new Error("Invalid product size.");
     if (item.color && colors.length && !colors.includes(item.color)) throw new Error("Invalid product color.");
     const quantity = item.quantity;
-    if (Number(product.inventory) < quantity) throw new Error("Insufficient stock.");
+    if (Number(product.inventory) < (quantities.get(product.id) ?? quantity)) throw new Error("Insufficient stock.");
     return { product_id: product.id, product_title: product.title, quantity, unit_price: Number(product.price), selected_size: item.size ?? null, selected_color: item.color ?? null };
   });
-  if (new Set(parsed.data.items.map((item) => item.productId)).size !== ids.length) {
+  if (ids.length !== parsed.data.items.length) {
     return NextResponse.json({ error: "Ungültige Warenkorbposition." }, { status: 400 });
   }
   const subtotalCents = lines.reduce((sum, line) => sum + Math.round(line.unit_price * 100) * line.quantity, 0);
