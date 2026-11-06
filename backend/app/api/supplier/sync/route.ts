@@ -32,7 +32,7 @@ function validToken(expected: string, supplied: string | null): boolean {
 
 export async function POST(request: Request) {
   const token = process.env.SUPPLIER_SYNC_TOKEN;
-  const supplied = request.headers.get("authorization")?.replace(/^Bearer\\s+/i, "") ?? null;
+  const supplied = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? null;
   if (!token || !validToken(token, supplied)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const parsed = payloadSchema.safeParse(await request.json().catch(() => null));
