@@ -57,7 +57,7 @@ export async function POST(request: Request) {
   const risk = scorePaymentRisk({ amountCents: totalCents, shippingCountry: parsed.data.shipping.country, ipCountry: request.headers.get("x-vercel-ip-country") ?? request.headers.get("cf-ipcountry") });
   const { data: order, error: orderError } = await admin.from("orders").insert({
     user_id: auth.user.id, status: risk.reviewRequired ? "pending_review" : "pending", currency, subtotal: subtotal / 100,
-    shipping_total: shippingCents / 100, total: totalCents / 100, payment_provider: "paypal",
+    shipping_total: shippingCents / 100, total: totalCents / 100, payment_provider: "paypal", shipping_address: { name: parsed.data.shipping.name, line1: parsed.data.shipping.street, city: parsed.data.shipping.city, postal_code: parsed.data.shipping.postalCode, country: parsed.data.shipping.country },
     risk_score: risk.score, risk_flags: risk.flags, shipping_country: parsed.data.shipping.country
   }).select("id").single();
   if (orderError || !order) return NextResponse.json({ error: "Bestellung konnte nicht angelegt werden." }, { status: 502 });
