@@ -11,6 +11,7 @@ export async function createSupabaseServerClient() {
   if (!url || !anonKey) throw new Error("Supabase server configuration is missing.");
 
   return createServerClient(url, anonKey, {
+    cookieOptions: { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/" },
     cookies: {
       getAll() {
         return cookieStore.getAll();
