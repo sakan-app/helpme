@@ -1,7 +1,8 @@
 export type PaymentRiskInput = {
   amountCents: number;
   billingCountry?: string | null;
-  shippingCountry?: string | null;\n  ipCountry?: string | null;
+  shippingCountry?: string | null;
+  ipCountry?: string | null;
   billingPostalCode?: string | null;
   shippingPostalCode?: string | null;
   avsPostalMatch?: boolean | null;
@@ -12,7 +13,10 @@ export function scorePaymentRisk(input: PaymentRiskInput): { score: number; flag
   const flags: string[] = [];
   let score = 0;
   if (input.amountCents >= 100000) { score += 25; flags.push("high_value_order"); }
-  if (input.ipCountry && input.shippingCountry && /^[A-Z]{2}$/.test(input.ipCountry.toUpperCase()) && input.ipCountry.toUpperCase() !== "XX" && input.ipCountry.toUpperCase() !== input.shippingCountry.toUpperCase()) {\n    score += 20; flags.push("shipping_ip_country_mismatch");\n  }\n  if (input.billingCountry && input.shippingCountry && input.billingCountry.toUpperCase() !== input.shippingCountry.toUpperCase()) {
+  if (input.ipCountry && input.shippingCountry && /^[A-Z]{2}$/.test(input.ipCountry.toUpperCase()) && input.ipCountry.toUpperCase() !== "XX" && input.ipCountry.toUpperCase() !== input.shippingCountry.toUpperCase()) {
+    score += 20; flags.push("shipping_ip_country_mismatch");
+  }
+  if (input.billingCountry && input.shippingCountry && input.billingCountry.toUpperCase() !== input.shippingCountry.toUpperCase()) {
     score += 20; flags.push("billing_shipping_country_mismatch");
   }
   if (input.billingPostalCode && input.shippingPostalCode && input.billingPostalCode.trim().toLowerCase() !== input.shippingPostalCode.trim().toLowerCase()) {
