@@ -63,3 +63,38 @@ The storefront includes the four requested sample products, category/search filt
 `POST /api/supplier/sync` accepts a JSON payload containing `products` (1–250 records). Each record supports `id`, `title`, `category`, `description`, `price`, `currency`, `imageUrl`, `sku`, `supplier`, `inventory`, `sizes`, `colors`, and `active`. Authenticate with `Authorization: Bearer <SUPPLIER_SYNC_TOKEN>`. The token and Supabase service-role key must exist only in server secrets. This is the normalized staging interface for a CJ Dropshipping adapter; it does not claim a live CJ connection until supplier API credentials and an authorized sync job are configured.
 
 The storefront reads active records from `GET /api/catalog`. When the database has no rows or the API is unavailable, the four built-in showcase products remain visible.
+
+
+## Security hardening (migration 003)
+
+Apply `supabase/migrations/202611060003_security_hardening.sql` after the initial store migration. It adds customer-owned profiles and carts, extends order risk fields, and creates a private, idempotent payment-webhook event ledger. RLS is enabled on these tables; customer policies scope rows to `auth.uid()`. Financial writes are deliberately restricted to trusted server-side service-role handlers after provider verification. Never expose `SUPABASE_SERVICE_ROLE_KEY` to the browser.
+
+### Required production security secrets
+
+- `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`: required for production rate limiting. The service fails closed with HTTP 503 if Redis is unavailable or missing. Login attempts are limited and an IP is locked after five failed attempts within ten minutes. Signup, password reset, password update, and checkout have separate limits.
+- `DATA_ENCRYPTION_KEY`: base64-encoded 32-byte key for AES-256-GCM encryption of sensitive payment metadata. Generate with `openssl rand -base64 32`; store only in encrypted host secrets and back it up securely. Never rotate it without a planned decrypt/re-encrypt migration.
+- `APP_ORIGIN`: exact HTTPS origin used for auth redirects and same-origin checks.
+
+### Payment provider setup
+
+- Stripe: configure `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`; point the Stripe webhook to `/api/webhooks/stripe`. The checkout endpoint `POST /api/checkout` requires an authenticated user, recalculates prices from Supabase, checks stock and variants, creates the order server-side, and returns a PaymentIntent client secret. The signed webhook checks amount/currency, CVC/AVS signals and Radar risk before marking an order paid; high-risk or mismatched orders remain `pending_review`.
+- PayPal: configure the REST app credentials and registered `PAYPAL_WEBHOOK_ID`; point the webhook to `/api/webhooks/paypal`. The route uses PayPal's verify-webhook-signature API before processing. A PayPal order must carry the local Helpmey order UUID in `resource.custom_id` for reconciliation.
+- Klarna: configure `KLARNA_WEBHOOK_SIGNING_KEYS` as a JSON object mapping each exact `Klarna-Signing-Key-Id` header value to its signing secret. Point the webhook to `/api/webhooks/klarna`. The route verifies HMAC-SHA256 over the untouched request body using the matching key ID and compares signatures in constant time. Rotate keys by temporarily keeping both old and new key IDs in the JSON map.
+
+All webhook events are deduplicated in `payment_webhook_events`. A processing failure releases the event claim so the payment provider can retry. Do not mark an order paid based on a browser redirect or client-side state.
+
+### Browser, session and input protections
+
+The middleware adds a per-request nonce Content Security Policy, same-origin checks for state-changing auth/checkout requests, and security headers (including frame denial and HSTS in production). Supabase server sessions use HTTP-only, Secure-in-production, SameSite=Lax cookies. Authentication requests are routed through server endpoints; the browser does not read session tokens. API payloads are strict Zod schemas and Supabase queries use parameterized client methods. The database and hosting platform must enforce TLS; enable TLS 1.3 at the hosting edge where supported. SMTP transport enforces certificate validation and TLS 1.2 minimum for compatibility with the mail provider.
+
+### Operational launch checklist
+
+1. Apply all three SQL migrations in order.
+2. Configure and test Upstash Redis; do not deploy critical routes without it.
+3. Set a fresh `DATA_ENCRYPTION_KEY`, Supabase URL/anon/service-role keys and exact HTTPS `APP_ORIGIN` in host secrets.
+4. Configure Stripe webhook signing secret and test payment-intent success/failure events in test mode.
+5. Configure PayPal and/or Klarna signing credentials only if those payment methods are enabled.
+6. Configure SMTP credentials for `server@digital-future.ai`; Supabase Auth Custom SMTP is configured separately in the Supabase dashboard.
+7. Run dependency audit, production build, database RLS tests and provider webhook replay/tampering tests before public launch.
+
+This hardening is an implementation baseline, not a certification or a guarantee of zero vulnerabilities. Production launch still requires the external secrets, provider dashboards, HTTPS/TLS edge settings, database migration, and live end-to-end security tests above.
