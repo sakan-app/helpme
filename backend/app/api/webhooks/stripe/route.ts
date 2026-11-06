@@ -41,13 +41,13 @@ export async function POST(request: Request) {
           intent.currency.toUpperCase() === String(order.currency).toUpperCase();
         let cvcCheck: "pass" | "fail" | "unavailable" | null = null;
         let avsPostalMatch: boolean | null = null;
-        let providerRiskHigh = false;
+        let providerRiskHigh = false;\n        let providerRiskScore = 0;
         if (typeof intent.latest_charge === "string") {
           const charge = await stripe.charges.retrieve(intent.latest_charge);
           const checks = charge.payment_method_details?.card?.checks;
           cvcCheck = checks?.cvc_check === "pass" ? "pass" : checks?.cvc_check === "fail" ? "fail" : "unavailable";
           avsPostalMatch = checks?.address_postal_code_check === "fail" ? false : checks?.address_postal_code_check === "pass" ? true : null;
-          providerRiskHigh = String(charge.outcome?.risk_level ?? "").toLowerCase().includes("high");
+          const radarLevel = String(charge.outcome?.risk_level ?? "").toLowerCase();\n          providerRiskScore = radarLevel === "highest" ? 80 : radarLevel === "elevated" ? 50 : 0;\n          providerRiskHigh = providerRiskScore > 0;
         }
         const scored = scorePaymentRisk({
           amountCents: expected,
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
           cvcCheck
         });
         const flags = [...new Set([...(Array.isArray(order.risk_flags) ? order.risk_flags as string[] : []), ...scored.flags, ...(providerRiskHigh ? ["stripe_radar_high_risk"] : []), ...(!amountMatches ? ["payment_amount_or_currency_mismatch"] : [])])];
-        const score = Math.max(Number(order.risk_score), scored.score, providerRiskHigh ? 80 : 0, amountMatches ? 0 : 100);
+        const score = Math.max(Number(order.risk_score), scored.score, providerRiskScore, amountMatches ? 0 : 100);
         const status = amountMatches && score < 40 ? "paid" : "pending_review";
         const { error } = await admin.from("orders").update({
           status, risk_score: score, risk_flags: flags
