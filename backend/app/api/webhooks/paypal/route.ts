@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/security/webhook-events";
+import { emailPaidOrderInvoice } from "@/lib/invoices";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -52,16 +53,30 @@ export async function POST(request: Request) {
       if (orderId) {
         const amount = resource?.amount as Record<string, unknown> | undefined;
         const admin = createSupabaseAdminClient();
-        const { data: order, error: readError } = await admin.from("orders").select("id,total,currency,risk_score").eq("id", orderId).maybeSingle();
+        const { data: order, error: readError } = await admin.from("orders").select("id,total,currency,risk_score,customer_name,customer_email,customer_phone,shipping_address,billing_address").eq("id", orderId).maybeSingle();
         if (readError) throw new Error("Could not read PayPal order.");
         if (order) {
           const matches = Math.round(Number(amount?.value) * 100) === Math.round(Number(order.total) * 100) &&
             String(amount?.currency_code ?? "").toUpperCase() === String(order.currency).toUpperCase();
-          const { error } = await admin.from("orders").update({
-            status: matches && Number(order.risk_score) < 40 ? "paid" : "pending_review",
-            ...(!matches ? { risk_score: 100, risk_flags: ["paypal_amount_or_currency_mismatch"] } : {})
-          }).eq("id", orderId).in("status", ["pending", "pending_review"]);
-          if (error) throw new Error("Could not reconcile PayPal payment.");
+          if (!matches) {
+            const { error: reviewError } = await admin.from("orders").update({
+              status: "pending_review", risk_score: 100, risk_flags: ["paypal_amount_or_currency_mismatch"]
+            }).eq("id", orderId).in("status", ["pending", "pending_review"]);
+            if (reviewError) throw new Error("Could not flag PayPal payment for review.");
+          } else {
+            const { error: finalizeError } = await admin.rpc("finalize_paid_order", {
+              p_order_id: orderId,
+              p_provider: "paypal",
+              p_payment_reference: String(resource?.id ?? eventId),
+              p_customer_name: String(order.customer_name ?? ""),
+              p_customer_email: String(order.customer_email ?? ""),
+              p_customer_phone: order.customer_phone,
+              p_shipping_address: order.shipping_address,
+              p_billing_address: order.billing_address
+            });
+            if (finalizeError) throw new Error("Could not finalize verified PayPal payment.");
+            await emailPaidOrderInvoice(orderId);
+          }
         }
       }
     }
