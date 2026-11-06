@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { claimWebhookEvent } from "@/lib/security/webhook-events";
+import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/security/webhook-events";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,6 +18,9 @@ export async function POST(request: Request) {
   if (Object.values(headers).some((value) => !value)) return NextResponse.json({ error: "Missing PayPal signature headers." }, { status: 400 });
 
   const apiBase = process.env.PAYPAL_API_BASE ?? "https://api-m.paypal.com";
+  const eventId = String(event.id ?? "");
+  const eventType = String(event.event_type ?? "");
+  let claimed = false;
   try {
     const tokenResponse = await fetch(apiBase + "/v1/oauth2/token", {
       method: "POST",
@@ -39,10 +42,8 @@ export async function POST(request: Request) {
     const verification = await verifyResponse.json() as { verification_status?: string };
     if (!verifyResponse.ok || verification.verification_status !== "SUCCESS") return NextResponse.json({ error: "Invalid PayPal webhook signature." }, { status: 400 });
 
-    const eventId = String(event.id ?? "");
-    const eventType = String(event.event_type ?? "");
-    const fresh = await claimWebhookEvent("paypal", eventId, eventType);
-    if (!fresh) return NextResponse.json({ received: true, duplicate: true });
+    claimed = await claimWebhookEvent("paypal", eventId, eventType);
+    if (!claimed) return NextResponse.json({ received: true, duplicate: true });
     if (eventType === "PAYMENT.CAPTURE.COMPLETED") {
       const resource = event.resource as Record<string, unknown> | undefined;
       const related = resource?.supplementary_data as Record<string, unknown> | undefined;
@@ -51,19 +52,22 @@ export async function POST(request: Request) {
       if (orderId) {
         const amount = resource?.amount as Record<string, unknown> | undefined;
         const admin = createSupabaseAdminClient();
-        const { data: order } = await admin.from("orders").select("id,total,currency,risk_score").eq("id", orderId).maybeSingle();
+        const { data: order, error: readError } = await admin.from("orders").select("id,total,currency,risk_score").eq("id", orderId).maybeSingle();
+        if (readError) throw new Error("Could not read PayPal order.");
         if (order) {
           const matches = Math.round(Number(amount?.value) * 100) === Math.round(Number(order.total) * 100) &&
             String(amount?.currency_code ?? "").toUpperCase() === String(order.currency).toUpperCase();
-          await admin.from("orders").update({
+          const { error } = await admin.from("orders").update({
             status: matches && Number(order.risk_score) < 40 ? "paid" : "pending_review",
             ...(!matches ? { risk_score: 100, risk_flags: ["paypal_amount_or_currency_mismatch"] } : {})
           }).eq("id", orderId).in("status", ["pending", "pending_review"]);
+          if (error) throw new Error("Could not reconcile PayPal payment.");
         }
       }
     }
     return NextResponse.json({ received: true });
   } catch {
-    return NextResponse.json({ error: "PayPal webhook verification or processing failed." }, { status: 503 });
+    if (claimed) await releaseWebhookEvent("paypal", eventId).catch(() => undefined);
+    return NextResponse.json({ error: "PayPal webhook verification or processing failed; provider may retry." }, { status: 503 });
   }
 }
