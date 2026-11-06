@@ -47,7 +47,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Mindestens ein Produkt ist nicht mehr verfügbar." }, { status: 409 });
   }
 
-  let lines: Array<{ product_id: string; product_title: string; quantity: number; unit_price: number; selected_size: string | null; selected_color: string | null }> = [];\n  try {\n  lines = parsed.data.items.map((item) => {
+  let lines: Array<{ product_id: string; product_title: string; quantity: number; unit_price: number; selected_size: string | null; selected_color: string | null }> = [];
+  try {
+  lines = parsed.data.items.map((item) => {
     const product = products.find((candidate) => candidate.id === item.productId);
     if (!product) throw new Error("Product lookup mismatch.");
     const variants = product.variants && typeof product.variants === "object" ? product.variants as Record<string, unknown> : {};
