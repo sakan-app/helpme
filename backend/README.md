@@ -23,20 +23,20 @@ Optional direct PostgreSQL URLs:
 SMTP:
 - `SMTP_HOST=smtps.udag.de`
 - `SMTP_PORT=465`, `SMTP_SECURE=true` (implicit TLS), or port 587 with STARTTLS.
-- `SMTP_USER=contact@digital-future.ai`
+- `SMTP_USER=server@digital-future.ai`
 - `SMTP_PASS` is the mailbox password and belongs only in the host's encrypted secret store.
-- `SMTP_FROM=Helpmey <contact@digital-future.ai>`
+- `SMTP_FROM=Helpmey <server@digital-future.ai>`
 
 Nodemailer enforces TLS 1.2+, certificate validation, and SMTP authentication. The protected `POST /api/internal/smtp-check` route performs a real connection/authentication test only when `SMTP_TEST_TOKEN` is configured.
 
 ## Supabase Auth email delivery
 
-The browser storefront uses Supabase Auth for signup, login, logout, and password recovery. To route confirmation and recovery emails through the official domain mailbox, enable **Custom SMTP** in Supabase Dashboard → Authentication → SMTP Settings:
+The storefront sends signup, login, logout, and password recovery requests through server-side Supabase Auth endpoints using HTTP-only session cookies. To route confirmation and recovery emails through the official domain mailbox, enable **Custom SMTP** in Supabase Dashboard → Authentication → SMTP Settings:
 - Host: `smtps.udag.de`
 - Port: `465`
-- Username: `contact@digital-future.ai`
+- Username: `server@digital-future.ai`
 - Password: set the real mailbox password in the Supabase dashboard secret field.
-- Sender email: `contact@digital-future.ai`
+- Sender email: `server@digital-future.ai`
 - Sender name: `Helpmey`
 
 Configure the Supabase Site URL and redirect allow-list to include the deployed origin and `/auth/callback`. Supabase Auth sends its own confirmation/recovery messages using its configured SMTP provider; the Nodemailer transport is for application-side transactional messages. Do not assume SMTP works until a live test succeeds.
