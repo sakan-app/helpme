@@ -56,3 +56,10 @@ Deploy the `backend/` directory as the project root in a Node.js host such as Ve
 ## Scope and launch status
 
 The storefront includes the four requested sample products, category/search filtering, variant selection, local cart and wishlist state, multilingual UI labels, and Supabase account UI. Payment is deliberately not represented as live: a real checkout requires a payment provider account, server-side order creation, verified webhooks, tax/shipping configuration and end-to-end testing. CJ Dropshipping also requires supplier credentials and a server-side sync job before inventory/prices can be live. Legal text is a draft and must be reviewed against the actual business details and current German/EU law before publication.
+
+
+## Supplier staging API
+
+`POST /api/supplier/sync` accepts a JSON payload containing `products` (1–250 records). Each record supports `id`, `title`, `category`, `description`, `price`, `currency`, `imageUrl`, `sku`, `supplier`, `inventory`, `sizes`, `colors`, and `active`. Authenticate with `Authorization: Bearer <SUPPLIER_SYNC_TOKEN>`. The token and Supabase service-role key must exist only in server secrets. This is the normalized staging interface for a CJ Dropshipping adapter; it does not claim a live CJ connection until supplier API credentials and an authorized sync job are configured.
+
+The storefront reads active records from `GET /api/catalog`. When the database has no rows or the API is unavailable, the four built-in showcase products remain visible.
