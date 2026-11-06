@@ -93,6 +93,13 @@ export async function buildInvoicePdf(order: InvoiceOrder, items: InvoiceItem[])
     page.drawLine({ start: { x: left, y: y + 8 }, end: { x: right, y: y + 8 }, thickness: 0.5, color: gold });
   }
   y -= 8;
+  const itemSubtotal = items.reduce((sum, item) => sum + Number(item.unit_price) * Number(item.quantity), 0);
+  const shippingTotal = Math.max(0, Number(order.total) - itemSubtotal);
+  if (shippingTotal > 0.005) {
+    draw("Versand", 420, y, 9, regular);
+    draw(euro(shippingTotal, order.currency), 540, y, 9, regular);
+    y -= 16;
+  }
   draw("Gesamtbetrag", 420, y, 10, bold);
   draw(euro(order.total, order.currency), 540, y, 10, bold);
   y -= 34;
