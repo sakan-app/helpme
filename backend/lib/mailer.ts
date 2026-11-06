@@ -6,7 +6,7 @@ const emailSchema = z.string().trim().email().max(254);
 const orderMailSchema = z.object({
   to: emailSchema,
   orderReference: z.string().regex(/^[a-zA-Z0-9_-]{1,64}$/),
-  total: z.string().max(40).regex(/^[0-9]+(?:[.,][0-9]{2})?\\s?(?:EUR|€)$/)
+  total: z.string().max(40).regex(/^[0-9]+(?:[.,][0-9]{2})?\s?(?:EUR|€)$/)
 }).strict();
 
 function getTransport(): Transporter {
@@ -35,7 +35,7 @@ export async function sendTransactionalMail(options: Omit<SendMailOptions, "from
   if (typeof options.to !== "string" || !emailSchema.safeParse(options.to).success) {
     throw new Error("Transactional email recipient is invalid.");
   }
-  const subject = typeof options.subject === "string" ? options.subject.replace(/[\\r\\n]+/g, " ").slice(0, 200) : "Helpmey notification";
+  const subject = typeof options.subject === "string" ? options.subject.replace(/[\r\n]+/g, " ").slice(0, 200) : "Helpmey notification";
   const replyTo = typeof options.replyTo === "string" && emailSchema.safeParse(options.replyTo).success ? options.replyTo : undefined;
   const from = options.from ?? process.env.SMTP_FROM ?? "Helpmey <server@digital-future.ai>";
   return getTransport().sendMail({ ...options, from, to: options.to, subject, replyTo });
@@ -55,7 +55,7 @@ export async function sendOrderConfirmation(input: { to: string; orderReference:
 export async function sendOperationsAlert(subject: string, message: string) {
   return sendTransactionalMail({
     to: process.env.SERVER_EMAIL ?? "server@digital-future.ai",
-    subject: subject.replace(/[\\r\\n]+/g, " ").slice(0, 160),
-    text: message.replace(/\\u0000/g, "").slice(0, 10000)
+    subject: subject.replace(/[\r\n]+/g, " ").slice(0, 160),
+    text: message.replace(/\u0000/g, "").slice(0, 10000)
   });
 }
