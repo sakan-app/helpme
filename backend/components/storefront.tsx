@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import type { User } from "@supabase/supabase-js";
 import { Heart, Search, ShoppingBag, UserRound, X, Plus, Minus, Globe, Menu, Crown, ArrowRight, ShieldCheck, Mail } from "lucide-react";
@@ -75,7 +75,7 @@ export default function Storefront() {
     setCart(old=>{const found=old.find(x=>x.key===key);return found?old.map(x=>x.key===key?{...x,quantity:Math.min(99,x.quantity+count)}:x):[...old,{key,product,size:selectedSize,color:selectedColor,quantity:count}]});
     setModal("cart");
   }
-  async function submitAuth(event:React.FormEvent<HTMLFormElement>) {
+  async function submitAuth(event:FormEvent<HTMLFormElement>) {
     event.preventDefault();setBusy(true);setAuthMessage("");
     try {
       const supabase=createSupabaseBrowserClient();
