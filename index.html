@@ -185,6 +185,13 @@ footer .brand small{font-size:8px;letter-spacing:2px}
 .product-card .product-info p{letter-spacing:.08em;text-transform:uppercase;font-size:10px;color:#C5A880}
 @media(max-width:1000px){.product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.product-card{height:320px}.nav-dropdown{flex-shrink:0}}
+
+/* Homepage palace artwork: show the original image in full, without cropping. */
+.hero{display:block;min-height:0;grid-template-columns:1fr;padding:clamp(14px,3vw,40px) clamp(10px,3vw,40px);background:#0a0a0a}
+.hero-art{width:min(100%,1440px);height:auto;min-height:0;aspect-ratio:1365/768;margin:0 auto;padding:9px;overflow:hidden}
+.hero-art img{position:relative;inset:auto;display:block;width:100%;height:100%;object-fit:contain;object-position:center;opacity:1;border-radius:6px}
+.hero-art:after{display:none}
+@media(max-width:560px){.hero{padding:10px 8px}.hero-art{width:100%;min-height:0;aspect-ratio:1365/768;padding:5px}.hero-art img{width:100%;height:100%}}
 </style></head>
 <body>
 <header>
@@ -198,7 +205,7 @@ footer .brand small{font-size:8px;letter-spacing:2px}
 <main id="main">
 <section class="hero" id="home" aria-label="Helpmey Palace">
   <div class="hero-art">
-    <img src="./assets/helpmey-palace-hero.jpg" width="1365" height="768" fetchpriority="high" decoding="async" alt="Helpmey luxury palace storefront with crowned H wreath emblem, Helpmey signage, elegant couple carrying branded shopping bags, gold department plaque and illuminated marble facade">
+    <img src="./backend/public/helpmey-palace-hero.jpg" width="1365" height="768" fetchpriority="high" decoding="async" alt="Helpmey luxury palace storefront with crowned H wreath emblem, Helpmey signage, elegant couple carrying branded shopping bags, gold department plaque and illuminated marble facade">
   </div>
 </section>
 <section class="worlds" aria-label="VIP Kollektionen"><button class="world-card" data-action="women"><img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1100&q=85" alt="Damen Mode Editorial"><span class="world-label"><strong data-i18n="womenWorld">Damen World</strong><span data-i18n="exploreCollection">Kollektion entdecken ↗</span></span></button><button class="world-card" data-action="men"><img src="https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&w=1100&q=85" alt="Elegante Herrenmode"><span class="world-label"><strong data-i18n="menWorld">Herren World</strong><span data-i18n="exploreCollection">Kollektion entdecken ↗</span></span></button></section>
