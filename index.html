@@ -164,6 +164,27 @@ footer .brand small{font-size:8px;letter-spacing:2px}
 .hero-art:after,.hero-art .art-copy{display:none}
 @media(max-width:850px){.hero{display:block;padding:0}.hero-art{min-height:0}}
 
+
+/* Helpmey luxury homepage finish */
+.hero{display:block!important;min-height:0!important;padding:0!important;margin:0!important;background:#121212!important}
+.hero-art{min-height:0!important;height:auto!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:#121212!important;overflow:hidden}
+.hero-art img{position:static!important;display:block!important;width:100%!important;height:auto!important;aspect-ratio:1365/768;object-fit:cover!important;opacity:1!important;border-radius:0!important}
+.hero-art:after,.hero-art .art-copy{display:none!important}
+.product-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+.product-card{height:430px}
+.nav-offer{color:#D4AF37!important;position:relative}
+.nav-offer:before{content:"";display:inline-block;width:6px;height:6px;margin:0 7px 2px 0;border-radius:50%;background:#D4AF37;box-shadow:0 0 9px #D4AF37}
+.nav-dropdown{position:relative;display:flex;align-items:center;color:#eee}
+.nav-dropdown summary{cursor:pointer;list-style:none;padding:5px 0}
+.nav-dropdown summary::-webkit-details-marker{display:none}
+.nav-dropdown summary:after{content:"⌄";margin-left:7px;color:#D4AF37}
+.nav-menu{position:absolute;top:calc(100% + 12px);left:0;z-index:40;min-width:190px;padding:9px;background:#101010;border:1px solid #C5A880;border-radius:8px;box-shadow:0 14px 34px #000b;display:grid;gap:3px}
+.nav-menu a{padding:9px 10px;border-radius:5px;color:#eee}
+.nav-menu a:hover{background:#C5A88020;color:#E8D4A8}
+.product-card .product-info h3{font-family:'Playfair Display',serif;font-size:17px}
+.product-card .product-info p{letter-spacing:.08em;text-transform:uppercase;font-size:10px;color:#C5A880}
+@media(max-width:1000px){.product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.product-card{height:320px}.nav-dropdown{flex-shrink:0}}
 </style></head>
 <body>
 <header>
@@ -172,7 +193,7 @@ footer .brand small{font-size:8px;letter-spacing:2px}
  <input id="search" class="search" type="search" placeholder="Produkte suchen …" aria-label="Produktsuche" list="searchHints"><datalist id="searchHints"></datalist>
  <button class="newsletter" data-action="newsletter" data-i18n="newsletter">VIP Newsletter</button><button class="icon-btn" data-action="cart" aria-label="Warenkorb"><svg class="bag-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8.5h14l1.2 12H3.8L5 8.5Z"/><path d="M8.5 9V6.5a3.5 3.5 0 0 1 7 0V9"/></svg><span class="count" id="cartCount">0</span></button>
  </div></div>
- <nav class="nav"><a href="#home" data-action="home" data-i18n="home">Startseite</a><a href="#about" data-action="about" data-i18n="about">Über uns</a><a href="#damen" data-action="women" data-i18n="women">Damen</a><a href="#herren" data-action="men" data-i18n="men">Herren</a><a href="#phones" data-action="phones" data-i18n="phones">Telefon-Zubehör</a><a href="#contact" data-action="contact" data-i18n="contact">Kontakt</a></nav>
+ <nav class="nav" aria-label="Hauptnavigation"><a href="#home" data-action="home">Startseite</a><a href="#catalog" data-action="women">Shop</a><a href="#catalog" class="nav-offer" data-action="women">Angebote</a><a href="#about" data-action="about">Über uns</a><details class="nav-dropdown"><summary>Kollektionen</summary><div class="nav-menu"><a href="#catalog" data-action="women">Parfums</a><a href="#catalog" data-action="women">Geschenke</a><a href="#catalog" data-action="women">Uhren</a><a href="#catalog" data-action="women">Taschen</a><a href="#catalog" data-action="women">Sportbekleidung</a></div></details><details class="nav-dropdown"><summary>Mehr</summary><div class="nav-menu"><a href="#contact" data-action="contact">Kontakt</a><a href="#trackingTitle">Bestellung verfolgen</a><a href="#contact">Versand & Rückgabe</a></div></details></nav>
 </header>
 <main id="main">
 <section class="hero" id="home" aria-label="Helpmey Palace">
@@ -235,7 +256,7 @@ function renderView(){
  $('#catalogTitle').textContent=titleForView();$('#catalogDescription').textContent=view==='women'?t('womenDesc'):view==='men'?t('menDesc'):t('phonesDesc');
  $('#catalogEyebrow').textContent=view==='phones'?'PHONE ACCESSORIES':view.toUpperCase()+' VIP COLLECTION';
  const tabs=$('#categoryTabs'),brandGrid=$('#brandGrid'),grid=$('#productGrid');tabs.innerHTML='';brandGrid.hidden=true;grid.hidden=false;
- if(view==='home'){tabs.innerHTML='';grid.innerHTML='<div class="empty-state" style="grid-column:1/-1">';grid.firstElementChild.textContent=t('exploreCollection');return}
+ if(view==='home'){tabs.innerHTML='';}
  if(view==='phones'&&phoneBrand===''){tabs.innerHTML='';}
  if(view==='women'||view==='men'){
   const cats=view==='women'?womenCats:menCats;
@@ -247,7 +268,16 @@ function renderView(){
  }
  const items=[];
  const kind=view==='women'||view==='men'?categoryLabel(category):phoneBrand+' · '+t('phones');
- for(let i=1;i<=20;i++)items.push({id:view+'|'+(view==='phones'?phoneBrand:category)+'|'+i,kind,index:i,title:t('product')+' '+String(i).padStart(2,'0'),price:prices[(i-1+(view==='men'?4:view==='phones'?8:0))%prices.length]});
+ if(view==='home'){
+  [
+   {id:'helpmey-performance-leggings',kind:'SPORTBEKLEIDUNG · BESTSELLER',index:1,title:'Performance Leggings',price:68.00},
+   {id:'helpmey-city-leather-tote',kind:'TASCHEN · BESTSELLER',index:2,title:'City Leather Tote',price:210.00},
+   {id:'helpmey-noir-chronograph',kind:'UHREN · BESTSELLER',index:3,title:'Noir Chronograph',price:349.00},
+   {id:'helpmey-discovery-box',kind:'GESCHENKE · BESTSELLER',index:4,title:'Signature Discovery Box',price:89.00}
+  ].forEach(p=>items.push(p));
+ } else {
+  for(let i=1;i<=20;i++)items.push({id:view+'|'+(view==='phones'?phoneBrand:category)+'|'+i,kind,index:i,title:t('product')+' '+String(i).padStart(2,'0'),price:prices[(i-1+(view==='men'?4:view==='phones'?8:0))%prices.length]});
+ }
  const filtered=searchTerm?items.filter(p=>(p.title+' '+p.kind+' '+(view==='phones'?phoneBrand:'')).toLowerCase().includes(searchTerm.toLowerCase())):items;
  grid.innerHTML='';if(!filtered.length){const e=document.createElement('div');e.className='empty-state';e.style.gridColumn='1/-1';e.textContent=t('searchNone');grid.append(e);return}
  filtered.forEach(p=>{const el=document.createElement('article');el.className='product-card';el.tabIndex=0;el.setAttribute('role','button');el.setAttribute('aria-label',p.title);el.innerHTML='<div class="product-image"><span class="number">VIP / '+String(p.index).padStart(2,'0')+'</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 2l2.4 6.8L21 12l-6.6 3.2L12 22l-2.4-6.8L3 12l6.6-3.2L12 2z"/></svg></div><div class="product-info"><h3></h3><p></p><div class="product-bottom"><b></b><button class="arrow" aria-label="'+t('details')+'">›</button></div></div>';el.querySelector('h3').textContent=p.title;el.querySelector('p').textContent=p.kind;el.querySelector('b').textContent=money(p.price);el.onclick=()=>openProduct(p);el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openProduct(p)}};el.querySelector('button').onclick=e=>{e.stopPropagation();openProduct(p)};grid.append(el)});
@@ -267,7 +297,7 @@ function newsletter(){modalMode='newsletter';openModal('<h2 id="modalTitle">'+t(
 function cookieSettings(){modalMode='cookies';let pref={};try{pref=JSON.parse(localStorage.getItem('helpmey_cookie_consent_v1')||'{}')}catch(e){}openModal('<h2 id="modalTitle">'+t('cookieSettings')+'</h2><p>'+t('cookieText')+'</p><div class="form-row"><label>'+t('necessary')+' — immer aktiv</label></div><div class="form-row"><label><input type="checkbox" id="analytics" '+(pref.analytics?'checked':'')+'> '+t('analytics')+'</label></div><div class="form-row"><label><input type="checkbox" id="personalization" '+(pref.personalization?'checked':'')+'> '+t('personalization')+'</label></div><button class="primary" id="saveCookies" style="width:100%">'+t('save')+'</button><button class="outline" id="onlyNecessary" style="width:100%;margin-top:9px">'+t('onlyNecessary')+'</button>');$('#saveCookies').onclick=()=>saveCookies('custom',$('#analytics').checked,$('#personalization').checked);$('#onlyNecessary').onclick=()=>saveCookies('rejected',false,false)}
 function saveCookies(choice,analytics,personalization){try{localStorage.setItem('cookieConsent','true');localStorage.setItem('helpmey_cookie_consent_v1',JSON.stringify({choice,necessary:true,analytics,personalization,savedAt:new Date().toISOString()}))}catch(e){}const b=$('#cookieBanner');b.classList.add('leaving');setTimeout(()=>{b.hidden=true;b.style.display='none';b.classList.remove('leaving')},220);closeModal()}
 function showCookie(){let accepted=false;try{accepted=localStorage.getItem('cookieConsent')==='true'||!!localStorage.getItem('helpmey_cookie_consent_v1')}catch(e){}const b=$('#cookieBanner');if(accepted){b.hidden=true;b.style.display='none'}else{b.hidden=false;b.style.display='grid'}}
-function legal(type){const titles={imprint:t('imprintTitle'),terms:t('termsTitle'),privacy:t('privacyTitle'),withdrawal:t('withdrawalTitle')};let content='';if(type==='imprint')content='<p><strong>Betreiber / Anbieter:</strong> digital future</p><p><strong>Name:</strong> Akhmed Ismail Saied</p><p><strong>Anschrift:</strong> Ehndorfer Str. 130, 24537 Neumünster, Deutschland</p><p><strong>E-Mail:</strong> <a href="mailto:info@digital-future.ai">info@digital-future.ai</a> · <a href="mailto:server@digital-future.ai">server@digital-future.ai</a></p><p><strong>Website:</strong> <a href="https://www.digital-future.ai">digital-future.ai</a></p>';else content='<p>'+t('legalNotice')+'</p><p>Helpmey / DIGITAL FUTURE</p>';openModal('<h2 id="modalTitle">'+titles[type]+'</h2>'+content)}
+function legal(type){const titles={imprint:t('imprintTitle'),terms:t('termsTitle'),privacy:t('privacyTitle'),withdrawal:t('withdrawalTitle')};let content='';if(type==='imprint')content='<p><strong>Betreiber / Inhaber:</strong> SAKAN (Inhaber: Ahmed Ismail Saed)</p><p><strong>Anschrift:</strong> Ehndorfer Str. 130, 24537 Neumünster, Deutschland</p><p><strong>E-Mail:</strong> <a href="mailto:info@digital-future.ai">info@digital-future.ai</a> · <a href="mailto:server@digital-future.ai">server@digital-future.ai</a></p><p><strong>Umsatzsteuer:</strong> Kleinunternehmer im Sinne von § 19 UStG.</p><p><strong>Online-Streitbeilegung:</strong> Hinweise gemäß Art. 14 Abs. 1 ODR-VO und § 5 DDG.</p>';else content='<p>'+t('legalNotice')+'</p><p>Helpmey / DIGITAL FUTURE</p>';openModal('<h2 id="modalTitle">'+titles[type]+'</h2>'+content)}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 let toastTimer;function toast(s){const e=$('#toast');e.textContent=s;e.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>e.hidden=true,2200)}
 document.addEventListener('click',e=>{const a=e.target.closest('[data-action]');if(a){const v=a.dataset.action;if(v==='home'){view='home';renderView();window.scrollTo({top:0,behavior:'smooth'})}if(v==='women'||v==='men'||v==='phones')go(v);if(v==='cart')openCart();if(v==='newsletter')newsletter();if(v==='cookieSettings')cookieSettings();if(v==='about')document.querySelector('#about').scrollIntoView({behavior:'smooth'});if(v==='contact')document.querySelector('#contact').scrollIntoView({behavior:'smooth'});if(v==='closeModal')closeModal()}const l=e.target.closest('[data-legal]');if(l)legal(l.dataset.legal);const c=e.target.closest('[data-cookie]');if(c)saveCookies(c.dataset.cookie,c.dataset.cookie==='accept',c.dataset.cookie==='accept')});
