@@ -130,7 +130,7 @@ export default function Storefront() {
           <div className="mt-7 flex flex-wrap gap-3"><a className="gold-button" href="#shop">{t.cta}<ArrowRight size={15}/></a><a className="outline-button" href="#about">{t.about}</a></div>
         </div>
         <div className="hero-no-image" aria-hidden="true"/>
-        <img className="hero-image" src="/helpmey-palace-hero.jpg" alt="Helpmey luxury palace storefront with marble facade and golden lighting" onError={e=>{e.currentTarget.style.display="none"}}/>
+        <img className="hero-image" src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/helpmey-palace-hero.jpg`} alt="Helpmey luxury palace storefront with marble facade and golden lighting" fetchPriority="high" decoding="async" onError={e=>{e.currentTarget.style.display="none"}}/>
       </section>
 
       <section className="section shell" id="shop">
