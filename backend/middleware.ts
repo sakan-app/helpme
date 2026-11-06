@@ -24,10 +24,11 @@ export async function middleware(request: NextRequest) {
   requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("Content-Security-Policy", policy);
   const path = request.nextUrl.pathname;
-  const skipOriginCheck = path.startsWith("/api/webhooks/") || path === "/api/supplier/sync";
+  const providerWebhook = path.startsWith("/api/webhooks/") || path === "/api/payments/stripe/webhook";
   const requiresSameOrigin = request.method !== "GET" && request.method !== "HEAD" &&
-    (path.startsWith("/api/auth/") || path === "/api/checkout");
-  if (requiresSameOrigin && !skipOriginCheck) {
+    (path.startsWith("/api/auth/") || path === "/api/checkout" ||
+      (path.startsWith("/api/payments/") && !providerWebhook) || path === "/api/contact");
+  if (requiresSameOrigin && !providerWebhook) {
     const origin = request.headers.get("origin");
     if (!origin || origin !== request.nextUrl.origin) {
       const denied = NextResponse.json({ error: "Cross-origin request denied." }, { status: 403 });
