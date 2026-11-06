@@ -51,14 +51,14 @@ export async function enforceRateLimit(request: Request, scope: string, limit: n
   return increment(`helpmey:rl:${scope}:${digest(ip)}`, limit, windowSeconds);
 }
 
-export async function recordFailedLogin(request: Request, email: string): Promise<RateResult> {
+export async function recordFailedLogin(request: Request, _email: string): Promise<RateResult> {
   const ip = clientIp(request);
-  return increment(`helpmey:login-fail:${digest(ip)}:${digest(email.toLowerCase())}`, 5, 600);
+  return increment(`helpmey:login-fail:${digest(ip)}`, 5, 600);
 }
 
-export async function clearFailedLogin(request: Request, email: string): Promise<void> {
+export async function clearFailedLogin(request: Request, _email: string): Promise<void> {
   const ip = clientIp(request);
-  const key = `helpmey:login-fail:${digest(ip)}:${digest(email.toLowerCase())}`;
+  const key = `helpmey:login-fail:${digest(ip)}`;
   if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
     await redisCommand<number>(["DEL", key]);
     return;
