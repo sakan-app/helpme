@@ -46,7 +46,7 @@ export async function buildInvoicePdf(order: InvoiceOrder, items: InvoiceItem[])
   const left = 48;
   const right = 547;
   const draw = (value: unknown, x: number, y: number, size = 9, font = regular, color = ink) => {
-    const text = safeText(value).normalize("NFKD").replace(/[^\x20-\xFF]/g, "?");
+    const text = safeText(value).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\x20-\xFF]/g, "?");
     page.drawText(text, { x, y, size, font, color });
   };
   page.drawRectangle({ x: 0, y: 830, width: 595, height: 12, color: gold });
