@@ -75,7 +75,7 @@ export async function POST(request: Request) {
   const risk = scorePaymentRisk({
     amountCents: totalCents,
     billingCountry: parsed.data.billingCountry,
-    shippingCountry: parsed.data.shippingCountry,
+    shippingCountry: parsed.data.shippingCountry,\n    ipCountry: request.headers.get("x-vercel-ip-country") ?? request.headers.get("cf-ipcountry"),
     billingPostalCode: parsed.data.billingPostalCode,
     shippingPostalCode: parsed.data.shippingPostalCode
   });
