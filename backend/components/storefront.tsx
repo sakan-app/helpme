@@ -94,7 +94,7 @@ export default function Storefront() {
     finally { setBusy(false); }
   }
   async function signOut() { try { const supabase=createSupabaseBrowserClient();await supabase.auth.signOut();setUser(null);setAuthMessage("Sie wurden abgemeldet."); } catch { setAuthMessage("Abmeldung nicht verfügbar."); } }
-  async function subscribe(event:React.FormEvent<HTMLFormElement>) { event.preventDefault();setAuthMessage("Newsletter-Anmeldung benötigt noch einen verbundenen Newsletter-Anbieter."); }
+  async function subscribe(event:FormEvent<HTMLFormElement>) { event.preventDefault();setAuthMessage("Newsletter-Anmeldung benötigt noch einen verbundenen Newsletter-Anbieter."); }
 
   return <div dir={isRtl?"rtl":"ltr"}>
     <header className="site-header">
