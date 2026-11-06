@@ -99,3 +99,11 @@ a { color: inherit; text-decoration: none; }
 @media(max-width:950px) { .product-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .header-search { width: 130px; } .footer-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media(max-width:650px) { .shell { width: min(100% - 28px,1440px); } .header-main { min-height: 78px; flex-wrap: wrap; padding-block: 12px; } .header-tools { gap: 3px; } .header-search { order: 3; width: 100%; } .header-nav { justify-content: flex-start; overflow-x: auto; gap: 22px; padding-block: 13px; } .hero { min-height: 650px; align-items: end; } .hero-image { inset: 0; width: 100%; height: 100%; object-position: center; opacity: .55; } .hero-no-image { inset: 0; } .hero::after { background: linear-gradient(0deg,#0c0c0b 0%,#0c0c0ba8 42%,#0c0c0b35 100%); } .hero-copy { padding-block: 300px 45px; } .section { padding-block: 48px; } .section-heading { display: block; } .newsletter-block { grid-template-columns: 1fr; gap: 18px; } .newsletter-form { flex-direction: column; } .footer-grid { grid-template-columns: 1fr 1fr; gap: 20px; } .icon-action span { display: none; } }
 @media(max-width:390px) { .product-grid { gap: 9px; } .product-info { padding: 10px; } .product-info h3 { font-size: 16px; } .product-buy { align-items: start; flex-direction: column; } .footer-grid { grid-template-columns: 1fr; } }
+
+/* The supplied palace artwork is the homepage's full-width first impression. */
+.hero { display: flex; min-height: 0; flex-direction: column; align-items: stretch; overflow: visible; background: #121212; }
+.hero-image { position: relative; inset: auto; display: block; order: 0; width: 100%; height: auto; max-height: none; object-fit: contain; object-position: center; opacity: 1; background: #121212; }
+.hero-no-image { display: none; }
+.hero::after { display: none; }
+.hero-copy { order: 1; width: min(1440px, calc(100% - 48px)); max-width: none; margin-inline: auto; padding: 52px 0 58px; }
+@media(max-width:650px) { .hero-image { width: 100%; height: auto; } .hero-copy { width: calc(100% - 28px); padding: 32px 0 42px; } }
