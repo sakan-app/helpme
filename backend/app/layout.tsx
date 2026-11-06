@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Helpmey Account Services",
-  robots: { index: false, follow: false }
+  title: "Helpmey — Everyday Store",
+  description: "Zeitlose Essentials, Naturfasern, ehrliche Keramik und leise Accessoires. Helpmey Everyday Store.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com"),
+  applicationName: "Helpmey",
+  robots: { index: true, follow: true }
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  return <html lang="de"><body style={{ margin: 0, background: "#121212", color: "#f8f5f0", fontFamily: "Arial, sans-serif" }}>{children}</body></html>;
+  return <html lang="de"><body>{children}</body></html>;
 }
