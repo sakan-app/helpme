@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import "./globals.css";\nimport "./luxury-store.css";
+import "./globals.css";
+import "./luxury-store.css";
 
 export const metadata: Metadata = {
   title: "Helpmey — Everyday Store",
