@@ -1,5 +1,5 @@
-import Storefront from "@/components/storefront";
+import LuxuryStorefront from "@/components/luxury-storefront";
 
 export default function HomePage() {
-  return <Storefront />;
+  return <LuxuryStorefront />;
 }
