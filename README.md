@@ -5,6 +5,10 @@ The repository contains two storefront generations:
 - `backend/` — the Next.js 15 App Router application. Deploy this folder as the project root on a Node.js host (for example, set Vercel Root Directory to `backend`). Read [backend/README.md](backend/README.md) for environment, Supabase, SMTP, database migration and deployment instructions.
 - `index.html` — the legacy static GitHub Pages storefront. It cannot run Next.js API routes, Supabase server sessions, supplier ingestion or SMTP server code.
 
+## Architecture and current build
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the current application topology, server/data/payment boundaries, security controls, deployment contract and known limitations. The deployed Next.js storefront exposes `GET /api/build-info`; its footer displays the deployed version, short commit SHA and environment. GitHub Pages deploys only the legacy static `index.html`; production Next.js hosting must use `backend/` as the project root.
+
 ## Required before production
 
 1. Rotate the Supabase database password if it has ever been shared in chat, tickets, or source control.
