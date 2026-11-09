@@ -56,9 +56,17 @@ export default function LuxuryStorefront() {
   const [quantity, setQuantity] = useState(1);
   const [step, setStep] = useState<Step>("catalog");
   const [cart, setCart] = useState<Line[]>([]);
-  const [cartOpen, setCartOpen] = useState(false);\n  const [buildInfo, setBuildInfo] = useState<BuildInfo | null>(null);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [buildInfo, setBuildInfo] = useState<BuildInfo | null>(null);
   const t = words[locale];
   const rtl = locale === "AR";
+
+  useEffect(() => {
+    fetch("/api/build-info", { cache: "no-store" })
+      .then(response => response.ok ? response.json() as Promise<BuildInfo> : Promise.reject(new Error("build info unavailable")))
+      .then(setBuildInfo)
+      .catch(() => setBuildInfo(null));
+  }, []);
 
   useEffect(() => {
     setLocale(localeFromBrowser());
