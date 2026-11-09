@@ -7,8 +7,11 @@
 ## 1. Repository topology
 
 - `backend/` is the canonical production application: Next.js 15 App Router, React 19, TypeScript 5, Tailwind CSS 4.
-- `index.html` at repository root is the legacy static GitHub Pages experience. It cannot execute server routes, secure sessions, supplier sync, payment webhooks or SMTP.
-- Deploy the Next.js application with **Vercel Root Directory = `backend`** (or an equivalent Node.js host). A green GitHub Pages deployment is not proof that the Next.js backend was built or deployed.
+- The user confirms that the live HELPMEY hosting project is **Cloudflare Pages** (`helpme`). The Cloudflare dashboard configuration and deployment logs are account-protected and were not directly inspected in this repository review.
+- `index.html` at repository root is a static entry point. A Cloudflare Pages deployment of this root static site does not, by itself, execute the Next.js server route handlers in `backend/app/api`.
+- The Next.js application uses server capabilities (API route handlers, auth/session cookies, payment webhooks, supplier sync, SMTP and server-side database access). It cannot be treated as a plain static export without redesigning those features. Cloudflare documents static Next.js export on Pages separately from full-stack Next.js hosting on Workers.
+- **Deployment decision required:** if the existing Pages project serves only the root static site, keep that deployment for the static shell and deploy the full-stack Next.js backend on Cloudflare Workers using a compatible adapter/runtime. Cloudflare currently documents OpenNext for existing apps and recommends evaluating vinext for new Next.js-on-Workers apps. Do not switch adapters or production routing until compatibility with this Next.js 15 codebase and all server dependencies is tested.
+- Do not assume Vercel is in use. Cloudflare Pages is the hosting target stated by the project owner.
 
 ## 2. Runtime layers and trust boundaries
 
@@ -47,11 +50,11 @@ npm start
 
 Node.js 20+ is required. The repository currently has no committed `backend/package-lock.json`; CI therefore uses `npm install`, not `npm ci`. Commit a reviewed lockfile before requiring fully reproducible dependency resolution.
 
-GitHub Actions validates TypeScript and runs the Next.js production build on pushes and pull requests. Vercel should build the `backend/` root from the selected deployment branch. Set `APP_ORIGIN`, `NEXT_PUBLIC_SITE_URL`, Supabase values and all required production secrets before production deployment.
+GitHub Actions validates TypeScript and runs the Next.js production build on pushes and pull requests. This CI build is a code-quality gate; it is not a Cloudflare deployment. For Cloudflare Pages, verify the project Root directory, build command and output directory against the selected static or adapter-based deployment model. For full-stack Next.js, use a Cloudflare Workers-compatible adapter and deploy/preview using the documented Workers workflow rather than assuming `next build` output is directly Pages-compatible. Configure `APP_ORIGIN`, `NEXT_PUBLIC_SITE_URL`, Supabase values and all required production secrets in the appropriate Cloudflare environment bindings/secrets.
 
 ## 6. Build identification
 
-`GET /api/build-info` reports the deployed app version, Git commit SHA and hosting environment without exposing secrets. The storefront footer displays the version, short commit and environment after the endpoint responds. Vercel supplies `VERCEL_GIT_COMMIT_SHA` and `VERCEL_ENV`; local runs report a local/development identity.
+`GET /api/build-info` reports the deployed app version, Git commit SHA and hosting environment without exposing secrets when the Next.js server route is running. The storefront footer displays the version, short commit and environment after the endpoint responds. The endpoint recognizes Cloudflare Pages build variables (`CF_PAGES_COMMIT_SHA`, `CF_PAGES_BRANCH`, `CF_PAGES_URL`) as well as generic/local fallbacks. A static Pages export cannot execute this Next.js route handler; in that case the footer intentionally omits build metadata until a compatible server/Pages Function endpoint is wired.
 
 A build badge identifies the source revision only. It does not assert that database migrations, SMTP, payment providers, supplier sync or end-to-end checkout are operational.
 
@@ -60,4 +63,4 @@ A build badge identifies the source revision only. It does not assert that datab
 - The luxury storefront has exactly 20 presentation slots per department; slots without matching active catalogue records remain empty templates.
 - Browser localization is currently DE/EN/AR. Other languages fall back to German; this is not universal automatic translation.
 - Payment UI must remain disabled until provider credentials, webhook configuration and end-to-end verification are complete.
-- GitHub Pages status covers only the legacy static site. Check the Vercel deployment for the actual Next.js application.
+- Cloudflare Pages deployment status confirms only the artifact configured for that Pages project. Confirm the Pages build settings and verify the full-stack backend separately if it is moved to Workers.
