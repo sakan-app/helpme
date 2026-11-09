@@ -13,6 +13,7 @@ type Department = { id: string; de: string; en: string; ar: string; icon: typeof
 type Product = { id: string; title: string; category: string; price?: number; currency?: string; sizes?: string[]; colors?: string[]; imageUrl?: string | null; description?: string; };
 type Line = { id: string; product: Product; size: string; color: string; quantity: number; };
 type Step = "catalog" | "product" | "summary" | "checkout";
+type BuildInfo = { version: string; commit: string; deployedAt: string | null; environment: string };
 
 const departments: Department[] = [
   { id:"sneakers", de:"Sneaker", en:"Sneakers", ar:"أحذية رياضية", icon:Footprints },
@@ -56,8 +57,16 @@ export default function LuxuryStorefront() {
   const [step, setStep] = useState<Step>("catalog");
   const [cart, setCart] = useState<Line[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
+  const [buildInfo, setBuildInfo] = useState<BuildInfo | null>(null);
   const t = words[locale];
   const rtl = locale === "AR";
+
+  useEffect(() => {
+    fetch("/api/build-info", { cache: "no-store" })
+      .then(response => response.ok ? response.json() as Promise<BuildInfo> : Promise.reject(new Error("build info unavailable")))
+      .then(setBuildInfo)
+      .catch(() => setBuildInfo(null));
+  }, []);
 
   useEffect(() => {
     setLocale(localeFromBrowser());
@@ -134,7 +143,7 @@ export default function LuxuryStorefront() {
 
     {step === "checkout" && <main className="luxury-flow"><span className="luxury-kicker">{t.secure}</span><h1>{t.checkout}</h1><div className="luxury-checkout-grid"><section className="luxury-payment-card"><div className="luxury-payment-head"><ShieldCheck/><span>{t.payment}</span><CreditCard/></div><div className="luxury-chip"/><div className="luxury-card-number">•••• &nbsp; •••• &nbsp; •••• &nbsp; ••••</div><div className="luxury-card-foot"><span>HELPMEY MEMBER</span><Crown size={24}/></div></section><section className="luxury-order-card"><h2>{t.summary}</h2>{cart.map(line=><div className="luxury-order-line" key={line.id}><span>{line.product.title || line.product.category} × {line.quantity}</span><strong>{money((line.product.price||0)*line.quantity,line.product.currency)}</strong></div>)}<div className="luxury-order-total"><span>{t.subtotal}</span><strong>{money(subtotal)}</strong></div><p>{t.demo}</p><button className="luxury-primary full" disabled>{t.pay}<ShieldCheck size={15}/></button></section></div></main>}
 
-    <footer className="luxury-footer"><Crown size={21}/><span>HELPMEY</span><small>TIMELESS BY DESIGN · EST. 2025</small></footer>
+    <footer className="luxury-footer"><Crown size={21}/><span>HELPMEY</span><small>TIMELESS BY DESIGN · EST. 2025</small>{buildInfo && <small className="luxury-build-meta">BUILD {buildInfo.version} · {buildInfo.commit.slice(0, 7)} · {buildInfo.environment}</small>}</footer>
 
     {cartOpen && <div className="luxury-overlay" onClick={()=>setCartOpen(false)}><aside className="luxury-cart-panel" onClick={e=>e.stopPropagation()}><button className="luxury-close" onClick={()=>setCartOpen(false)}><X/></button><span className="luxury-kicker">{t.cart}</span><h2>{t.cart}</h2>{cart.length===0?<p>{t.empty}</p>:cart.map(line=><div className="luxury-order-line" key={line.id}><span>{line.product.title || line.product.category} · {line.size} · {line.color} × {line.quantity}</span><strong>{money((line.product.price||0)*line.quantity,line.product.currency)}</strong></div>)}<div className="luxury-order-total"><span>{t.subtotal}</span><strong>{money(subtotal)}</strong></div><button className="luxury-primary full" disabled={!cart.length} onClick={()=>{setCartOpen(false);setStep("checkout")}}>{t.checkout}<ArrowRight size={15}/></button></aside></div>}
   </div>;
