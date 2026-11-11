@@ -1,198 +1,89 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
-import {
-  ArrowLeft, ArrowRight, Bluetooth, BriefcaseBusiness, Check, ChevronDown, Crown,
-  Gem, Heart, Laptop, Menu, Minus, Monitor, Package, Plus, Search, ShieldCheck,
-  ShoppingBag, Smartphone, Sparkles, Watch, X, Footprints, Shirt, Dumbbell,
-  ShirtIcon, ShoppingBasket, CreditCard, Globe2, UserRound
-} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Crown, ShoppingBag, Globe2, Search, Heart, X, Plus, Minus, ArrowRight, ArrowLeft, Sparkles, Watch, Gem, Gift, Shirt, BriefcaseBusiness, Flower2, Dumbbell, Truck, ShieldCheck, Package, CreditCard, MapPin, Mail, Instagram, ChevronDown } from "lucide-react";
 
-type Locale = "DE" | "EN" | "AR";
-type Department = { id: string; de: string; en: string; ar: string; icon: typeof Footprints; };
-type Product = { id: string; title: string; category: string; price?: number; currency?: string; sizes?: string[]; colors?: string[]; imageUrl?: string | null; description?: string; };
-type Line = { id: string; product: Product; size: string; color: string; quantity: number; };
-type Step = "catalog" | "product" | "summary" | "checkout";
-type User = { id: string; email?: string | null };
-
-const departments: Department[] = [
-  { id:"sneakers", de:"Sneaker", en:"Sneakers", ar:"أحذية رياضية", icon:Footprints },
-  { id:"smartphones", de:"Smartphones", en:"Smartphones", ar:"هواتف ذكية", icon:Smartphone },
-  { id:"computers", de:"Computer & Laptops", en:"Computers & Laptops", ar:"كمبيوتر", icon:Laptop },
-  { id:"bluetooth", de:"Bluetooth-Geräte", en:"Bluetooth Devices", ar:"بلوتوث", icon:Bluetooth },
-  { id:"womens-clothing", de:"Damenmode", en:"Women's Clothing", ar:"ملابس حريمي", icon:Shirt },
-  { id:"innerwear", de:"Unterwäsche", en:"Innerwear", ar:"ملابس داخلية", icon:ShirtIcon },
-  { id:"eveningwear", de:"Abendmode", en:"Evening Wear", ar:"ملابس سهرة", icon:Gem },
-  { id:"mens-suits", de:"Herrenanzüge", en:"Men's Suits", ar:"بدل رجالي", icon:BriefcaseBusiness },
-  { id:"perfumes", de:"Luxusparfüms", en:"Luxury Perfumes", ar:"عطور فاخرة", icon:Sparkles },
-  { id:"watches", de:"Uhren", en:"Watches", ar:"ساعات", icon:Watch },
-  { id:"womens-bags", de:"Damentaschen", en:"Women's Bags", ar:"شنط حريمي", icon:ShoppingBasket },
-  { id:"sportswear", de:"Sportbekleidung", en:"Sportswear", ar:"ملابس رياضية", icon:Dumbbell }
+type Locale = "EN"|"DE"|"AR"|"FR"|"ES"|"IT"|"NL"|"TR"|"PL"|"ZH";
+type Product = { id:string; title:string; category:string; price?:number; currency?:string; imageUrl?:string|null; description?:string; sizes?:string[]; colors?:string[] };
+type CartLine = { key:string; product:Product; size:string; color:string; qty:number };
+type Modal = "product"|"reserve"|"payment"|"cart"|"legal"|"tracking"|null;
+const categories = [
+  {id:"fashion",icon:Shirt},{id:"beauty",icon:Flower2},{id:"watches",icon:Watch},{id:"jewelry",icon:Gem},
+  {id:"gifts",icon:Gift},{id:"bags",icon:BriefcaseBusiness},{id:"perfumes",icon:Sparkles},{id:"sportswear",icon:Dumbbell}
 ];
-
-const words = {
-  DE: { tagline:"DIE KUNST DES BESONDEREN", headline:"Zeitlose Eleganz. Außergewöhnliche Auswahl.", intro:"Entdecken Sie eine kuratierte Welt aus Design, Stil und moderner Lebensart.", explore:"Kollektion entdecken", all:"Alle Kategorien", search:"Kollektion durchsuchen …", size:"Größe / Modell", color:"Farbe", price:"Preis", quantity:"Menge", continue:"Weiter", add:"In den Warenkorb", back:"Zurück", summary:"Ihre Auswahl", count:"Anzahl", type:"Kategorie", confirm:"Auswahl bestätigen", checkout:"Sicher zur Kasse", cart:"Warenkorb", empty:"Ihr Warenkorb ist noch leer.", subtotal:"Zwischensumme", payment:"Zahlung", secure:"Sichere Zahlungsabwicklung", cardholder:"Karteninhaber", cardnumber:"Kartennummer", expiry:"Ablaufdatum", cvv:"Prüfnummer", pay:"Zahlung fortsetzen", demo:"Zahlungsanbieter noch nicht verbunden. Es werden keine Kartendaten verarbeitet.", placeholder:"Produktbild folgt", select:"Auswählen", items:"Artikel", language:"Sprache", inventory:"Aus dem Sortiment", unavailable:"Preis und Varianten werden nach Anbindung des Inventars angezeigt.", account:"Konto", login:"Anmelden", signup:"Registrieren", email:"E-Mail", password:"Passwort", logout:"Abmelden", signedIn:"Angemeldet als", wait:"Bitte warten …", passwordRule:"Mindestens 12 Zeichen mit Groß- und Kleinbuchstaben und einer Zahl.", failed:"Die Anfrage konnte nicht verarbeitet werden.", noResults:"Keine passenden Artikel in dieser Kategorie." },
-  EN: { tagline:"THE ART OF DISTINCTION", headline:"Timeless elegance. An exceptional edit.", intro:"Discover a curated world of design, personal style and modern living.", explore:"Explore the collection", all:"All departments", search:"Search the collection …", size:"Size / Model", color:"Color", price:"Price", quantity:"Quantity", continue:"Continue", add:"Add to bag", back:"Back", summary:"Your selection", count:"Count", type:"Department", confirm:"Confirm selection", checkout:"Secure checkout", cart:"Shopping bag", empty:"Your bag is empty.", subtotal:"Subtotal", payment:"Payment", secure:"Secure payment experience", cardholder:"Cardholder", cardnumber:"Card number", expiry:"Expiry date", cvv:"Security code", pay:"Continue to payment", demo:"Payment provider not connected. No card details are processed.", placeholder:"Product image coming soon", select:"Select", items:"Items", language:"Language", inventory:"From our collection", unavailable:"Price and variants appear once inventory is connected.", account:"Account", login:"Sign in", signup:"Create account", email:"Email", password:"Password", logout:"Sign out", signedIn:"Signed in as", wait:"Please wait …", passwordRule:"At least 12 characters with upper and lower case letters and a number.", failed:"The request could not be completed.", noResults:"No matching items in this department." },
-  AR: { tagline:"فن التميز", headline:"أناقة خالدة. مجموعة استثنائية.", intro:"اكتشف عالماً منتقى من التصميم والأناقة وأسلوب الحياة العصري.", explore:"اكتشف المجموعة", all:"جميع الأقسام", search:"ابحث في المجموعة …", size:"المقاس / الطراز", color:"اللون", price:"السعر", quantity:"الكمية", continue:"متابعة", add:"أضف إلى السلة", back:"رجوع", summary:"اختياراتك", count:"العدد", type:"القسم", confirm:"تأكيد الاختيار", checkout:"الدفع الآمن", cart:"سلة التسوق", empty:"سلتك فارغة حالياً.", subtotal:"المجموع الفرعي", payment:"الدفع", secure:"تجربة دفع آمنة", cardholder:"حامل البطاقة", cardnumber:"رقم البطاقة", expiry:"تاريخ الانتهاء", cvv:"رمز الأمان", pay:"متابعة الدفع", demo:"لم يتم ربط مزود الدفع بعد. لن تتم معالجة بيانات البطاقة.", placeholder:"صورة المنتج قريباً", select:"اختر", language:"اللغة", inventory:"من مجموعتنا", unavailable:"سيظهر السعر والخيارات بعد ربط المخزون.", account:"الحساب", login:"تسجيل الدخول", signup:"إنشاء حساب", email:"البريد الإلكتروني", password:"كلمة المرور", logout:"تسجيل الخروج", signedIn:"تم تسجيل الدخول باسم", wait:"يرجى الانتظار …", passwordRule:"12 حرفاً على الأقل مع أحرف كبيرة وصغيرة ورقم.", failed:"تعذر إكمال الطلب.", noResults:"لا توجد منتجات مطابقة في هذا القسم." }
-} satisfies Record<Locale, Record<string,string>>;
-
-const departmentWords: Record<string,string[]> = {
-  sneakers:["sneaker","shoe","shoes","schuh"], smartphones:["smartphone","phone","telefon"], computers:["computer","laptop","notebook"],
-  bluetooth:["bluetooth","audio","headphone","kopfhörer"], "womens-clothing":["damen","women","clothing","bekleidung"],
-  innerwear:["underwear","innerwear","wäsche","unterwäsche"], eveningwear:["evening","abend","dress","kleid"],
-  "mens-suits":["suit","anzug","menswear","herren"], perfumes:["perfume","parfum","parfüm","fragrance","duft"],
-  watches:["watch","uhr"], "womens-bags":["bag","tasche","handbag"], sportswear:["sport","sportswear","leggings"]
+const languages: {id:Locale;label:string}[] = [{id:"EN",label:"English"},{id:"DE",label:"Deutsch"},{id:"AR",label:"العربية"},{id:"FR",label:"Français"},{id:"ES",label:"Español"},{id:"IT",label:"Italiano"},{id:"NL",label:"Nederlands"},{id:"TR",label:"Türkçe"},{id:"PL",label:"Polski"},{id:"ZH",label:"中文"}];
+const words:Record<Locale,Record<string,string>> = {
+ EN:{tag:"LUXURY BEYOND LIMITS",hero:"An address for the extraordinary.",intro:"Discover a world of considered design, timeless icons and exceptional details.",shop:"Discover the collection",collections:"The collections",curated:"A world of distinction",search:"Search the collection",all:"All collections",add:"Add to bag",continue:"Continue",reserve:"Reserve your selection",quantity:"Quantity",size:"Size",color:"Colour",price:"Price",cart:"Shopping bag",empty:"Your bag is waiting for something beautiful.",subtotal:"Subtotal",payment:"Payment",pay:"Confirm reservation",mock:"Demo checkout · No payment will be taken.",close:"Close",tracking:"Track your order",trackingHint:"Enter your tracking number",track:"Track shipment",legal:"Legal",imprint:"Imprint",terms:"Terms & Conditions",privacy:"Privacy Policy",shipping:"Worldwide delivery",help:"Client care",follow:"Follow our world",rights:"© 2026 Helpmey. All rights reserved.",placeholder:"A place for your next favourite",select:"Discover",status:"Tracking reference received. Connect a carrier API to display live shipment events.",noProducts:"Your curated selection is being prepared.",sizeOptions:"One size",colorOptions:"Gold, Black, Ivory",reserved:"Your reservation is ready.",continueShopping:"Continue shopping",carrier:"Our global delivery partners",newsletter:"A little more extraordinary",newsletterText:"Receive private previews, new arrivals and notes from the world of Helpmey.",email:"Email address",subscribe:"Subscribe",legalNote:"Legal information for the Helpmey online store."},
+ DE:{tag:"LUXUS OHNE GRENZEN",hero:"Eine Adresse für das Außergewöhnliche.",intro:"Entdecken Sie eine Welt aus bewusstem Design, zeitlosen Ikonen und außergewöhnlichen Details.",shop:"Kollektion entdecken",collections:"Die Kollektionen",curated:"Eine Welt voller Besonderheit",search:"Kollektion durchsuchen",all:"Alle Kollektionen",add:"In den Warenkorb",continue:"Weiter",reserve:"Auswahl reservieren",quantity:"Menge",size:"Größe",color:"Farbe",price:"Preis",cart:"Einkaufstasche",empty:"Ihre Tasche wartet auf etwas Schönes.",subtotal:"Zwischensumme",payment:"Zahlung",pay:"Reservierung bestätigen",mock:"Demo-Kasse · Es wird keine Zahlung eingezogen.",close:"Schließen",tracking:"Bestellung verfolgen",trackingHint:"Sendungsnummer eingeben",track:"Sendung verfolgen",legal:"Rechtliches",imprint:"Impressum",terms:"AGB",privacy:"Datenschutz",shipping:"Weltweiter Versand",help:"Kundenservice",follow:"Folgen Sie unserer Welt",rights:"© 2026 Helpmey. All rights reserved.",placeholder:"Platz für Ihren nächsten Favoriten",select:"Entdecken",status:"Sendungsnummer erhalten. Verbinden Sie eine Carrier-API für Live-Sendungsereignisse.",noProducts:"Ihre kuratierte Auswahl wird vorbereitet.",sizeOptions:"Einheitsgröße",colorOptions:"Gold, Schwarz, Elfenbein",reserved:"Ihre Reservierung ist bereit.",continueShopping:"Weiter einkaufen",carrier:"Unsere internationalen Versandpartner",newsletter:"Ein Hauch mehr Außergewöhnliches",newsletterText:"Erhalten Sie private Vorschauen, Neuheiten und Einblicke in die Welt von Helpmey.",email:"E-Mail-Adresse",subscribe:"Abonnieren",legalNote:"Rechtliche Informationen zum Helpmey-Onlineshop."},
+ AR:{tag:"فخامة بلا حدود",hero:"عنوان لكل ما هو استثنائي.",intro:"اكتشف عالماً من التصميم المدروس والأيقونات الخالدة والتفاصيل الاستثنائية.",shop:"اكتشف المجموعة",collections:"المجموعات",curated:"عالم من التميز",search:"ابحث في المجموعة",all:"كل المجموعات",add:"أضف إلى الحقيبة",continue:"متابعة",reserve:"احجز اختيارك",quantity:"الكمية",size:"المقاس",color:"اللون",price:"السعر",cart:"حقيبة التسوق",empty:"حقيبتك تنتظر شيئاً جميلاً.",subtotal:"المجموع الفرعي",payment:"الدفع",pay:"تأكيد الحجز",mock:"دفع تجريبي · لن يتم تحصيل أي مبلغ.",close:"إغلاق",tracking:"تتبع طلبك",trackingHint:"أدخل رقم التتبع",track:"تتبع الشحنة",legal:"معلومات قانونية",imprint:"بيانات الشركة",terms:"الشروط والأحكام",privacy:"سياسة الخصوصية",shipping:"شحن عالمي",help:"خدمة العملاء",follow:"تابع عالمنا",rights:"© 2026 Helpmey. All rights reserved.",placeholder:"مكان لقطعتك المفضلة القادمة",select:"اكتشف",status:"تم استلام رقم التتبع. اربط واجهة شركة الشحن لعرض التحديثات المباشرة.",noProducts:"يتم إعداد مجموعتك المختارة.",sizeOptions:"مقاس واحد",colorOptions:"ذهبي، أسود، عاجي",reserved:"حجزك جاهز.",continueShopping:"متابعة التسوق",carrier:"شركاء الشحن العالميون",newsletter:"المزيد من الاستثنائية",newsletterText:"احصل على معاينات خاصة وأحدث المنتجات وأخبار عالم Helpmey.",email:"البريد الإلكتروني",subscribe:"اشتراك",legalNote:"المعلومات القانونية لمتجر Helpmey."},
+ FR:{tag:"LE LUXE SANS LIMITES",hero:"Une adresse pour l’exceptionnel.",intro:"Découvrez un univers de design réfléchi, d’icônes intemporelles et de détails remarquables.",shop:"Découvrir la collection",collections:"Les collections",curated:"Un monde de distinction",search:"Rechercher",all:"Toutes les collections",add:"Ajouter au panier",continue:"Continuer",reserve:"Réserver votre sélection",quantity:"Quantité",size:"Taille",color:"Couleur",price:"Prix",cart:"Panier",empty:"Votre panier attend une belle pièce.",subtotal:"Sous-total",payment:"Paiement",pay:"Confirmer la réservation",mock:"Paiement de démonstration · Aucun débit.",close:"Fermer",tracking:"Suivre votre commande",trackingHint:"Numéro de suivi",track:"Suivre",legal:"Mentions légales",imprint:"Mentions légales",terms:"Conditions générales",privacy:"Confidentialité",shipping:"Livraison mondiale",help:"Service client",follow:"Suivez notre univers",rights:"© 2026 Helpmey. All rights reserved.",placeholder:"La place de votre prochain coup de cœur",select:"Découvrir",status:"Référence reçue. Connectez une API transporteur pour le suivi en direct.",noProducts:"Votre sélection est en préparation.",sizeOptions:"Taille unique",colorOptions:"Or, noir, ivoire",reserved:"Votre réservation est prête.",continueShopping:"Continuer vos achats",carrier:"Nos partenaires de livraison",newsletter:"Un peu plus d’exceptionnel",newsletterText:"Avant-premières privées, nouveautés et actualités Helpmey.",email:"Adresse e-mail",subscribe:"S’inscrire",legalNote:"Informations légales de la boutique Helpmey."},
+ ES:{tag:"LUJO SIN LÍMITES",hero:"Una dirección para lo extraordinario.",intro:"Descubra un mundo de diseño cuidado, iconos atemporales y detalles excepcionales.",shop:"Descubrir la colección",collections:"Las colecciones",curated:"Un mundo de distinción",search:"Buscar colección",all:"Todas las colecciones",add:"Añadir a la bolsa",continue:"Continuar",reserve:"Reservar selección",quantity:"Cantidad",size:"Talla",color:"Color",price:"Precio",cart:"Bolsa",empty:"Su bolsa espera algo especial.",subtotal:"Subtotal",payment:"Pago",pay:"Confirmar reserva",mock:"Pago de demostración · No se realizará ningún cargo.",close:"Cerrar",tracking:"Seguir pedido",trackingHint:"Número de seguimiento",track:"Seguir envío",legal:"Información legal",imprint:"Aviso legal",terms:"Condiciones",privacy:"Privacidad",shipping:"Envíos internacionales",help:"Atención al cliente",follow:"Siga nuestro mundo",rights:"© 2026 Helpmey. All rights reserved.",placeholder:"Un espacio para su próximo favorito",select:"Descubrir",status:"Referencia recibida. Conecte una API de transporte para ver eventos en directo.",noProducts:"Estamos preparando su selección.",sizeOptions:"Talla única",colorOptions:"Oro, negro, marfil",reserved:"Su reserva está lista.",continueShopping:"Seguir comprando",carrier:"Socios logísticos globales",newsletter:"Un poco más extraordinario",newsletterText:"Preestrenos privados, novedades y noticias de Helpmey.",email:"Correo electrónico",subscribe:"Suscribirse",legalNote:"Información legal de la tienda Helpmey."},
+ IT:{tag:"LUSSO SENZA LIMITI",hero:"Un indirizzo per lo straordinario.",intro:"Scopri un mondo di design ricercato, icone senza tempo e dettagli eccezionali.",shop:"Scopri la collezione",collections:"Le collezioni",curated:"Un mondo di distinzione",search:"Cerca nella collezione",all:"Tutte le collezioni",add:"Aggiungi alla borsa",continue:"Continua",reserve:"Prenota la selezione",quantity:"Quantità",size:"Taglia",color:"Colore",price:"Prezzo",cart:"Borsa",empty:"La tua borsa aspetta qualcosa di speciale.",subtotal:"Subtotale",payment:"Pagamento",pay:"Conferma prenotazione",mock:"Pagamento demo · Nessun addebito.",close:"Chiudi",tracking:"Traccia l'ordine",trackingHint:"Numero di tracciamento",track:"Traccia spedizione",legal:"Note legali",imprint:"Note legali",terms:"Termini e condizioni",privacy:"Privacy",shipping:"Spedizione globale",help:"Assistenza clienti",follow:"Segui il nostro mondo",rights:"© 2026 Helpmey. All rights reserved.",placeholder:"Uno spazio per il tuo prossimo preferito",select:"Scopri",status:"Codice ricevuto. Collega un'API del corriere per gli eventi in tempo reale.",noProducts:"La selezione è in preparazione.",sizeOptions:"Taglia unica",colorOptions:"Oro, nero, avorio",reserved:"La prenotazione è pronta.",continueShopping:"Continua gli acquisti",carrier:"Partner di consegna globali",newsletter:"Un po' più straordinario",newsletterText:"Anteprime private, novità e storie dal mondo Helpmey.",email:"Indirizzo email",subscribe:"Iscriviti",legalNote:"Informazioni legali del negozio Helpmey."},
+ NL:{tag:"LUXE ZONDER GRENZEN",hero:"Een adres voor het buitengewone.",intro:"Ontdek een wereld van doordacht design, tijdloze iconen en bijzondere details.",shop:"Ontdek de collectie",collections:"De collecties",curated:"Een wereld van distinctie",search:"Zoek in de collectie",all:"Alle collecties",add:"In winkelmand",continue:"Verder",reserve:"Selectie reserveren",quantity:"Aantal",size:"Maat",color:"Kleur",price:"Prijs",cart:"Winkelmand",empty:"Je winkelmand wacht op iets moois.",subtotal:"Subtotaal",payment:"Betaling",pay:"Reservering bevestigen",mock:"Demo-afrekening · Er wordt niets afgeschreven.",close:"Sluiten",tracking:"Bestelling volgen",trackingHint:"Vul je track & trace in",track:"Zending volgen",legal:"Juridisch",imprint:"Colofon",terms:"Voorwaarden",privacy:"Privacybeleid",shipping:"Wereldwijde verzending",help:"Klantenservice",follow:"Volg onze wereld",rights:"© 2026 Helpmey. All rights reserved.",placeholder:"Ruimte voor je volgende favoriet",select:"Ontdek",status:"Referentie ontvangen. Koppel een vervoerders-API voor live updates.",noProducts:"Je selectie wordt voorbereid.",sizeOptions:"One size",colorOptions:"Goud, zwart, ivoor",reserved:"Je reservering staat klaar.",continueShopping:"Verder winkelen",carrier:"Onze wereldwijde bezorgpartners",newsletter:"Een beetje meer bijzonder",newsletterText:"Privé previews, nieuwkomers en nieuws uit de wereld van Helpmey.",email:"E-mailadres",subscribe:"Aanmelden",legalNote:"Juridische informatie voor de Helpmey-webwinkel."},
+ TR:{tag:"SINIRLARIN ÖTESİNDE LÜKS",hero:"Olağanüstü olanın adresi.",intro:"Özenli tasarım, zamansız ikonlar ve seçkin detaylarla dolu bir dünyayı keşfedin.",shop:"Koleksiyonu keşfet",collections:"Koleksiyonlar",curated:"Ayrıcalıklı bir dünya",search:"Koleksiyonda ara",all:"Tüm koleksiyonlar",add:"Sepete ekle",continue:"Devam et",reserve:"Seçimini ayırt",quantity:"Adet",size:"Beden",color:"Renk",price:"Fiyat",cart:"Alışveriş çantası",empty:"Çantanız güzel bir şey bekliyor.",subtotal:"Ara toplam",payment:"Ödeme",pay:"Rezervasyonu onayla",mock:"Demo ödeme · Kartınızdan ücret alınmaz.",close:"Kapat",tracking:"Siparişinizi takip edin",trackingHint:"Takip numarası",track:"Kargoyu takip et",legal:"Yasal",imprint:"Yasal bildirim",terms:"Şartlar ve koşullar",privacy:"Gizlilik politikası",shipping:"Dünya çapında teslimat",help:"Müşteri hizmetleri",follow:"Dünyamızı takip edin",rights:"© 2026 Helpmey. All rights reserved.",placeholder:"Yeni favoriniz için bir alan",select:"Keşfet",status:"Takip referansı alındı. Canlı olaylar için kargo API'si bağlayın.",noProducts:"Seçkin koleksiyonunuz hazırlanıyor.",sizeOptions:"Standart beden",colorOptions:"Altın, siyah, fildişi",reserved:"Rezervasyonunuz hazır.",continueShopping:"Alışverişe devam et",carrier:"Küresel teslimat ortaklarımız",newsletter:"Biraz daha olağanüstü",newsletterText:"Özel ön izlemeler, yenilikler ve Helpmey dünyasından notlar.",email:"E-posta adresi",subscribe:"Abone ol",legalNote:"Helpmey çevrimiçi mağazası yasal bilgileri."},
+ PL:{tag:"LUKSUS BEZ GRANIC",hero:"Adres dla rzeczy niezwykłych.",intro:"Odkryj świat przemyślanego wzornictwa, ponadczasowych ikon i wyjątkowych detali.",shop:"Odkryj kolekcję",collections:"Kolekcje",curated:"Świat wyjątkowości",search:"Szukaj w kolekcji",all:"Wszystkie kolekcje",add:"Dodaj do torby",continue:"Kontynuuj",reserve:"Zarezerwuj wybór",quantity:"Ilość",size:"Rozmiar",color:"Kolor",price:"Cena",cart:"Torba zakupowa",empty:"Twoja torba czeka na coś pięknego.",subtotal:"Suma częściowa",payment:"Płatność",pay:"Potwierdź rezerwację",mock:"Płatność demo · Żadna kwota nie zostanie pobrana.",close:"Zamknij",tracking:"Śledź zamówienie",trackingHint:"Numer przesyłki",track:"Śledź przesyłkę",legal:"Informacje prawne",imprint:"Nota prawna",terms:"Regulamin",privacy:"Prywatność",shipping:"Wysyłka na cały świat",help:"Obsługa klienta",follow:"Poznaj nasz świat",rights:"© 2026 Helpmey. All rights reserved.",placeholder:"Miejsce na Twojego nowego faworyta",select:"Odkryj",status:"Otrzymano numer. Podłącz API przewoźnika, aby wyświetlać aktualizacje na żywo.",noProducts:"Przygotowujemy wybraną kolekcję.",sizeOptions:"Uniwersalny",colorOptions:"Złoty, czarny, kość słoniowa",reserved:"Rezerwacja jest gotowa.",continueShopping:"Kontynuuj zakupy",carrier:"Nasi globalni partnerzy dostaw",newsletter:"Odrobina niezwykłości",newsletterText:"Prywatne zapowiedzi, nowości i wiadomości ze świata Helpmey.",email:"Adres e-mail",subscribe:"Zapisz się",legalNote:"Informacje prawne sklepu internetowego Helpmey."},
+ ZH:{tag:"奢华无界",hero:"非凡之选的专属之所。",intro:"探索匠心设计、 timeless 经典与卓越细节构成的精选世界。",shop:"探索系列",collections:"精选系列",curated:"卓越品味世界",search:"搜索系列",all:"全部系列",add:"加入购物袋",continue:"继续",reserve:"预留您的选择",quantity:"数量",size:"尺寸",color:"颜色",price:"价格",cart:"购物袋",empty:"购物袋正在等待一件美好之物。",subtotal:"小计",payment:"付款",pay:"确认预留",mock:"模拟结账 · 不会收取任何款项。",close:"关闭",tracking:"追踪订单",trackingHint:"输入追踪号码",track:"追踪包裹",legal:"法律信息",imprint:"法律声明",terms:"条款与条件",privacy:"隐私政策",shipping:"全球配送",help:"客户服务",follow:"关注我们的世界",rights:"© 2026 Helpmey. All rights reserved.",placeholder:"为下一件心爱之物留白",select:"探索",status:"已收到追踪编号。连接承运商 API 以显示实时物流事件。",noProducts:"正在为您准备精选系列。",sizeOptions:"均码",colorOptions:"金色、黑色、象牙白",reserved:"您的预留已准备就绪。",continueShopping:"继续购物",carrier:"全球配送合作伙伴",newsletter:"更多非凡体验",newsletterText:"获取私享预览、新品和 Helpmey 世界动态。",email:"电子邮箱",subscribe:"订阅",legalNote:"Helpmey 网上商店法律信息。"}
 };
-const departmentIds = new Set(departments.map(d => d.id));
-// Imported products carry a department id as category; only free-text categories are matched by words.
-const inDepartment = (p: Product, id: string) => departmentIds.has(p.category)
-  ? p.category === id
-  : (departmentWords[id] || [id]).some(term => (p.category || "").toLowerCase().includes(term));
-
-const money = (price?: number, currency = "EUR", locale = "de-DE") => typeof price === "number" ? new Intl.NumberFormat(locale, { style:"currency", currency }).format(price) : "—";
-const localeFromBrowser = (): Locale => {
-  if (typeof navigator === "undefined") return "DE";
-  const lang = navigator.language.toLowerCase();
-  if (lang.startsWith("ar")) return "AR";
-  if (lang.startsWith("en")) return "EN";
-  return "DE";
+const categoryNames:Record<Locale,string[]> = {
+ EN:["Fashion","Beauty","Watches","Jewelry","Gifts","Bags","Perfumes","Sportswear"],DE:["Fashion","Beauty","Uhren","Schmuck","Geschenke","Taschen","Parfüms","Sportmode"],AR:["الأزياء","الجمال","الساعات","المجوهرات","الهدايا","الحقائب","العطور","الملابس الرياضية"],FR:["Mode","Beauté","Montres","Bijoux","Cadeaux","Sacs","Parfums","Sport"],ES:["Moda","Belleza","Relojes","Joyería","Regalos","Bolsos","Perfumes","Deporte"],IT:["Moda","Bellezza","Orologi","Gioielli","Regali","Borse","Profumi","Sport"],NL:["Mode","Beauty","Horloges","Sieraden","Cadeaus","Tassen","Parfum","Sportkleding"],TR:["Moda","Güzellik","Saatler","Mücevher","Hediyeler","Çantalar","Parfümler","Spor giyim"],PL:["Moda","Uroda","Zegarki","Biżuteria","Prezenty","Torby","Perfumy","Odzież sportowa"],ZH:["时尚","美妆","腕表","珠宝","礼品","箱包","香水","运动服饰"]
 };
+const legalContent = {
+ imprint:["Impressum","Angaben gemäß § 5 DDG","Betreiber / Owner: Helpmey","Inhaber: Ahmed Ismail Saed","Anschrift:","Ehndorfer Str. 130","24537 Neumünster","Deutschland","Kontakt:","E-Mail: info@digital-future.ai","E-Mail: server@digital-future.ai","Umsatzsteuer:","Kleinunternehmer gemäß § 19 UStG","Verbraucherstreitbeilegung:","Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen."],
+ terms:["Terms & Conditions","These terms are a publication draft. Complete delivery, returns, payment, warranty and consumer withdrawal terms with legal counsel before accepting orders.","Reservations and checkout shown in this storefront are demonstrative until the production payment and order services are enabled."],
+ privacy:["Privacy Policy","This storefront should publish a complete GDPR privacy notice before launch. It must identify the controller, purposes and legal bases, processors, retention periods, international transfers, data subject rights and supervisory authority.","Do not enter payment card details in this demonstration." ]
+};
+const carriers = ["DHL","FedEx","UPS","ARAMEX","DPD","GLS"];
+const euro = (v?:number) => typeof v==="number" ? new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"}).format(v) : "Price on request";
 
 export default function LuxuryStorefront() {
-  const [locale, setLocale] = useState<Locale>("DE");
-  const [department, setDepartment] = useState("sneakers");
-  const [search, setSearch] = useState("");
-  const [inventory, setInventory] = useState<Product[]>([]);
-  const [selected, setSelected] = useState<Product | null>(null);
-  const [size, setSize] = useState("");
-  const [color, setColor] = useState("");
-  const [quantity, setQuantity] = useState(1);
-  const [step, setStep] = useState<Step>("catalog");
-  const [cart, setCart] = useState<Line[]>([]);
-  const [cartOpen, setCartOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [accountOpen, setAccountOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [authMessage, setAuthMessage] = useState("");
-  const [busy, setBusy] = useState(false);
-  const t = words[locale];
-  const rtl = locale === "AR";
-
-  useEffect(() => {
-    setLocale(localeFromBrowser());
-    try { setCart(JSON.parse(localStorage.getItem("helpmey_luxury_cart") || "[]")); } catch { setCart([]); }
-    fetch("/api/catalog", { cache:"no-store" })
-      .then(r => r.ok ? r.json() : Promise.reject(new Error("catalog unavailable")))
-      .then(data => { if (Array.isArray(data.products)) setInventory(data.products); })
-      .catch(() => {});
-    fetch("/api/auth/user", { cache:"no-store" })
-      .then(r => r.ok ? r.json() : { user: null })
-      .then(data => setUser(data.user ?? null))
-      .catch(() => setUser(null));
-  }, []);
-
-  const submitAuth = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); setBusy(true); setAuthMessage("");
-    try {
-      const response = await fetch(authMode === "signup" ? "/api/auth/signup" : "/api/auth/login", {
-        method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ email, password })
-      });
-      const data = await response.json().catch(() => ({})) as { error?: string; message?: string; user?: User | null };
-      if (!response.ok) throw new Error(data.error ?? t.failed);
-      if (authMode === "login" && data.user) { setUser(data.user); setPassword(""); }
-      else setAuthMessage(data.message ?? "");
-    } catch (error) { setAuthMessage(error instanceof Error ? error.message : t.failed); }
-    finally { setBusy(false); }
-  };
-  const signOut = async () => {
-    setBusy(true);
-    try { if ((await fetch("/api/auth/logout", { method:"POST" })).ok) { setUser(null); setAuthMessage(""); } else setAuthMessage(t.failed); }
-    catch { setAuthMessage(t.failed); }
-    finally { setBusy(false); }
-  };
-  useEffect(() => { try { localStorage.setItem("helpmey_luxury_cart", JSON.stringify(cart)); } catch {} }, [cart]);
-
-  const activeDepartment = departments.find(d => d.id === department)!;
-  const products = useMemo(() => inventory.filter(p => inDepartment(p, department)).slice(0,20), [inventory, department]);
-  // Once the catalogue has loaded, the menu lists only departments that have products.
-  const shownDepartments = useMemo(() => {
-    const stocked = departments.filter(d => inventory.some(p => inDepartment(p, d.id)));
-    return stocked.length ? stocked : departments;
-  }, [inventory]);
-  useEffect(() => {
-    if (!shownDepartments.some(d => d.id === department)) { setDepartment(shownDepartments[0].id); setStep("catalog"); }
-  }, [shownDepartments, department]);
-  const visible = products.filter(p => (p.title + " " + p.category).toLowerCase().includes(search.toLowerCase()));
-  const cartCount = cart.reduce((n,line) => n + line.quantity, 0);
-  const subtotal = cart.reduce((n,line) => n + (line.product.price || 0) * line.quantity, 0);
-  const openProduct = (product: Product) => { setSelected(product); setSize(product.sizes?.[0] || ""); setColor(product.colors?.[0] || ""); setQuantity(1); setStep("product"); };
-  const addToCart = () => {
-    if (!selected) return;
-    const id = [selected.id,size,color].join("::");
-    setCart(old => old.some(line => line.id === id)
-      ? old.map(line => line.id === id ? {...line,quantity:line.quantity+quantity} : line)
-      : [...old,{id,product:selected,size,color,quantity}]);
-    setStep("summary");
-  };
-
-  return <div className="luxury-store" dir={rtl ? "rtl" : "ltr"}>
-    <div className="luxury-topline">{t.tagline}<span>✧ &nbsp; HELPMEY &nbsp; ✧</span><span>EST. 2025</span></div>
-    <header className="luxury-header">
-      <a className="luxury-logo" href="#home" aria-label="Helpmey"><Crown size={23}/><span>HELPMEY</span><small>THE LUXURY EDIT</small></a>
-      <div className="luxury-actions">
-        <label className="luxury-language"><Globe2 size={15}/><select value={locale} onChange={e=>setLocale(e.target.value as Locale)} aria-label={t.language}><option value="DE">Deutsch</option><option value="EN">English</option><option value="AR">العربية</option></select></label>
-        <button onClick={()=>{setAuthMessage("");setAccountOpen(true);}} className="luxury-cart" aria-label={t.account}><UserRound size={17}/><span>{user ? t.account : t.login}</span></button>
-        <button onClick={()=>setCartOpen(true)} className="luxury-cart"><ShoppingBag size={17}/><span>{t.cart}</span><b>{cartCount}</b></button>
-      </div>
-    </header>
-    <nav className="luxury-departments" aria-label={t.all}>
-      {shownDepartments.map(item => { const Icon = item.icon; return <button key={item.id} className={department===item.id?"active":""} onClick={()=>{setDepartment(item.id);setStep("catalog");}}><Icon size={19}/><span>{item[locale.toLowerCase() as "de"|"en"|"ar"]}</span></button>; })}
-    </nav>
-
-    {step === "catalog" && <>
-      <section className="luxury-hero" id="home">
-        <div className="luxury-hero-copy"><div className="luxury-kicker">{activeDepartment[locale.toLowerCase() as "de"|"en"|"ar"]} &nbsp; · &nbsp; {t.tagline}</div><h1>{t.headline}</h1><p>{t.intro}</p><a href="#collection" className="luxury-primary">{t.explore}<ArrowRight size={15}/></a></div>
-        <div className="luxury-seal"><Crown size={35}/><span>H</span><small>HELPMEY</small></div>
-      </section>
-      <main className="luxury-main" id="collection">
-        <div className="luxury-section-head"><div><span className="luxury-kicker">{t.inventory}</span><h2>{activeDepartment[locale.toLowerCase() as "de"|"en"|"ar"]}</h2></div><label className="luxury-search"><Search size={16}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t.search}/></label></div>
-        <div className="luxury-product-grid">
-          {/* Placeholder slots only while a department has no products yet. */}
-          {Array.from({length: products.length ? visible.length : 20},(_,i)=> {
-            const product = visible[i];
-            const template: Product = product || {id:department+"-template-"+(i+1),title:"",category:department};
-            return <button key={template.id} className="luxury-product-card" onClick={()=>openProduct(template)}>
-              <span className="luxury-product-frame"><span className="luxury-product-ornament">✧</span>{product?.imageUrl ? <img src={product.imageUrl} alt={product.title}/> : <span className="luxury-product-placeholder"><Package size={27}/><small>{t.placeholder}</small><b>{String(i+1).padStart(2,"0")}</b></span>}<span className="luxury-quick-view">{t.select} <ArrowRight size={13}/></span></span>
-              <span className="luxury-product-meta"><span>{product?.title || "—"}</span><span>{t.size}: — &nbsp; · &nbsp; {t.color}: —</span><strong>{money(product?.price,product?.currency)}</strong></span>
-            </button>;
-          })}
-        </div>
-        <p className="luxury-note">{!products.length ? t.unavailable : !visible.length ? t.noResults : ""}</p>
-      </main>
-    </>}
-
-    {step === "product" && selected && <main className="luxury-flow"><button className="luxury-back" onClick={()=>setStep("catalog")}><ArrowLeft size={15}/>{t.back}</button><div className="luxury-product-detail"><div className="luxury-detail-visual">{selected.imageUrl?<img src={selected.imageUrl} alt={selected.title}/>:<div className="luxury-empty-art"><Crown size={48}/><span>HELPMEY</span></div>}</div><section className="luxury-detail-info"><span className="luxury-kicker">{activeDepartment[locale.toLowerCase() as "de"|"en"|"ar"]}</span><h1>{selected.title || activeDepartment[locale.toLowerCase() as "de"|"en"|"ar"]}</h1><p>{selected.description || t.unavailable}</p><strong className="luxury-detail-price">{money(selected.price,selected.currency)}</strong><label>{t.size}<select value={size} onChange={e=>setSize(e.target.value)}><option value="">—</option>{(selected.sizes || []).map(v=><option key={v}>{v}</option>)}</select></label><label>{t.color}<select value={color} onChange={e=>setColor(e.target.value)}><option value="">—</option>{(selected.colors || []).map(v=><option key={v}>{v}</option>)}</select></label><label>{t.quantity}<span className="luxury-quantity"><button onClick={()=>setQuantity(Math.max(1,quantity-1))}><Minus size={14}/></button>{quantity}<button onClick={()=>setQuantity(Math.min(99,quantity+1))}><Plus size={14}/></button></span></label><button className="luxury-primary full" onClick={addToCart}>{t.continue}<ArrowRight size={15}/></button></section></div></main>}
-
-    {step === "summary" && selected && <main className="luxury-flow"><span className="luxury-kicker">{t.summary}</span><h1>{t.summary}</h1><section className="luxury-summary-card"><div className="luxury-summary-monogram"><Crown size={34}/></div><div><span>{t.type}</span><h2>{activeDepartment[locale.toLowerCase() as "de"|"en"|"ar"]}</h2><p>{selected.title || activeDepartment[locale.toLowerCase() as "de"|"en"|"ar"]}</p><p>{t.size}: {size || "—"} &nbsp; · &nbsp; {t.color}: {color || "—"}</p></div><div className="luxury-summary-count"><span>{t.count}</span><strong>{quantity}</strong><small>{money(selected.price,selected.currency)}</small></div></section><div className="luxury-flow-actions"><button className="luxury-back" onClick={()=>setStep("product")}><ArrowLeft size={15}/>{t.back}</button><button className="luxury-primary" onClick={()=>setStep("checkout")}>{t.confirm}<ArrowRight size={15}/></button></div></main>}
-
-    {step === "checkout" && <main className="luxury-flow"><span className="luxury-kicker">{t.secure}</span><h1>{t.checkout}</h1><div className="luxury-checkout-grid"><section className="luxury-payment-card"><div className="luxury-payment-head"><ShieldCheck/><span>{t.payment}</span><CreditCard/></div><div className="luxury-chip"/><div className="luxury-card-number">•••• &nbsp; •••• &nbsp; •••• &nbsp; ••••</div><div className="luxury-card-foot"><span>HELPMEY MEMBER</span><Crown size={24}/></div></section><section className="luxury-order-card"><h2>{t.summary}</h2>{cart.map(line=><div className="luxury-order-line" key={line.id}><span>{line.product.title || line.product.category} × {line.quantity}</span><strong>{money((line.product.price||0)*line.quantity,line.product.currency)}</strong></div>)}<div className="luxury-order-total"><span>{t.subtotal}</span><strong>{money(subtotal)}</strong></div><p>{t.demo}</p><button className="luxury-primary full" disabled>{t.pay}<ShieldCheck size={15}/></button></section></div></main>}
-
-    <footer className="luxury-footer"><Crown size={21}/><span>HELPMEY</span><small>TIMELESS BY DESIGN · EST. 2025</small></footer>
-
-    {cartOpen && <div className="luxury-overlay" onClick={()=>setCartOpen(false)}><aside className="luxury-cart-panel" onClick={e=>e.stopPropagation()}><button className="luxury-close" onClick={()=>setCartOpen(false)}><X/></button><span className="luxury-kicker">{t.cart}</span><h2>{t.cart}</h2>{cart.length===0?<p>{t.empty}</p>:cart.map(line=><div className="luxury-order-line" key={line.id}><span>{line.product.title || line.product.category} · {line.size} · {line.color} × {line.quantity}</span><strong>{money((line.product.price||0)*line.quantity,line.product.currency)}</strong></div>)}<div className="luxury-order-total"><span>{t.subtotal}</span><strong>{money(subtotal)}</strong></div><button className="luxury-primary full" disabled={!cart.length} onClick={()=>{setCartOpen(false);setStep("checkout")}}>{t.checkout}<ArrowRight size={15}/></button></aside></div>}
-
-    {accountOpen && <div className="luxury-overlay" onClick={()=>setAccountOpen(false)}><aside className="luxury-cart-panel" onClick={e=>e.stopPropagation()}><button className="luxury-close" onClick={()=>setAccountOpen(false)} aria-label="Close"><X/></button><span className="luxury-kicker">HELPMEY</span><h2>{user ? t.account : t[authMode]}</h2>
-      {user ? <div className="luxury-auth-form"><p>{t.signedIn} {user.email}</p><button className="luxury-primary full" disabled={busy} onClick={signOut}>{busy ? t.wait : t.logout}</button></div>
-      : <form className="luxury-auth-form" onSubmit={submitAuth}>
-        <label>{t.email}<input type="email" autoComplete="email" required value={email} onChange={e=>setEmail(e.target.value)}/></label>
-        <label>{t.password}<input type="password" autoComplete={authMode==="signup"?"new-password":"current-password"} minLength={authMode==="signup"?12:1} required value={password} onChange={e=>setPassword(e.target.value)}/></label>
-        {authMode==="signup" && <small>{t.passwordRule}</small>}
-        <button className="luxury-primary full" disabled={busy}>{busy ? t.wait : t[authMode]}</button>
-        <button type="button" className="luxury-auth-switch" onClick={()=>{setAuthMode(authMode==="login"?"signup":"login");setAuthMessage("");}}>{authMode==="login" ? t.signup : t.login}</button>
-      </form>}
-      {authMessage && <p className="luxury-auth-message" role="status">{authMessage}</p>}
-    </aside></div>}
-  </div>;
+ const [lang,setLang]=useState<Locale>("EN"), [category,setCategory]=useState("fashion"), [query,setQuery]=useState("");
+ const [products,setProducts]=useState<Product[]>([]), [cart,setCart]=useState<CartLine[]>([]);
+ const [active,setActive]=useState<Product|null>(null), [size,setSize]=useState("One size"), [color,setColor]=useState("Gold");
+ const [qty,setQty]=useState(1), [modal,setModal]=useState<Modal>(null), [legal,setLegal]=useState<"imprint"|"terms"|"privacy">("imprint");
+ const [trackNo,setTrackNo]=useState(""), [trackMessage,setTrackMessage]=useState(""), [paymentDone,setPaymentDone]=useState(false);
+ const [heroOk,setHeroOk]=useState(true);
+ const t=words[lang], rtl=lang==="AR";
+ useEffect(()=>{try{setCart(JSON.parse(localStorage.getItem("helpmey_cart")||"[]"));}catch{} fetch("/api/catalog",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(d=>{if(Array.isArray(d?.products))setProducts(d.products);}).catch(()=>{});},[]);
+ useEffect(()=>{try{localStorage.setItem("helpmey_cart",JSON.stringify(cart));}catch{}},[cart]);
+ const categoryProducts=useMemo(()=>products.filter(p=>p.category?.toLowerCase()===category || p.category?.toLowerCase().includes(category)),[products,category]);
+ const shown=useMemo(()=>categoryProducts.filter(p=>(p.title+" "+p.category).toLowerCase().includes(query.toLowerCase())),[categoryProducts,query]);
+ const count=cart.reduce((n,l)=>n+l.qty,0), subtotal=cart.reduce((n,l)=>n+(l.product.price||0)*l.qty,0);
+ const makePlaceholder=(i:number):Product=>({id:category+"-placeholder-"+i,title:"",category,description:t.placeholder,price:undefined,sizes:["One size","S","M","L","XL"],colors:["Gold","Black","Ivory","Champagne","Silver"]});
+ const openProduct=(p:Product)=>{setActive(p);setSize(p.sizes?.[0]||"One size");setColor(p.colors?.[0]||"Gold");setQty(1);setModal("product");};
+ const reserve=()=>{if(!active)return;setModal("reserve");};
+ const add=()=>{if(!active)return;const key=[active.id,size,color].join("|");setCart(old=>old.some(x=>x.key===key)?old.map(x=>x.key===key?{...x,qty:x.qty+qty}:x):[...old,{key,product:active,size,color,qty}]);setModal("payment");};
+ const close=()=>{setModal(null);setPaymentDone(false);};
+ const track=()=>setTrackMessage(trackNo.trim()?t.status:"Please enter a tracking number.");
+ const fmt=(p?:number)=>euro(p);
+ const activeCat=categoryNames[lang][categories.findIndex(c=>c.id===category)]||category;
+ return <div className="hm-store" dir={rtl?"rtl":"ltr"}>
+  <div className="hm-language-bar"><span>PRIVATE CLIENT EXPERIENCE</span><label><Globe2 size={13}/><select aria-label="Language" value={lang} onChange={e=>setLang(e.target.value as Locale)}>{languages.map(l=><option key={l.id} value={l.id}>{l.label}</option>)}</select></label><span>COMPLIMENTARY WORLDWIDE DELIVERY</span></div>
+  <header className="hm-header"><a href="#home" className="hm-brand"><span className="hm-crest"><Crown size={22}/><b>H</b></span><strong>Helpmey</strong><small>{t.tag}</small></a><nav><a href="#collections">{t.collections}</a><a href="#shipping">{t.shipping}</a><a href="#footer">{t.help}</a></nav><div className="hm-head-actions"><button aria-label={t.cart} onClick={()=>setModal("cart")}><ShoppingBag size={20}/><i>{count}</i></button></div></header>
+  <main>
+   <section className="hm-hero" id="home">
+    {heroOk&&<img className="hm-hero-image" src="/helpmey-palace-hero.jpg" alt="Helpmey luxury palace storefront" onError={()=>setHeroOk(false)}/>}
+    <div className="hm-hero-shade"/><div className="hm-hero-copy"><div className="hm-overline"><span/> {t.tag} <span/></div><h1>{t.hero}</h1><p>{t.intro}</p><a className="hm-gold-button" href="#collections">{t.shop}<ArrowRight size={15}/></a></div>
+    <div className="hm-hero-stamp"><div className="hm-stamp-crown"><Crown/></div><b>H</b><span>HELPMEY</span><small>EST. 2025</small></div>
+   </section>
+   <section className="hm-collections hm-wrap" id="collections"><div className="hm-section-head"><div><span className="hm-eyebrow">{t.curated}</span><h2>{t.collections}</h2></div><label className="hm-search"><Search size={16}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder={t.search}/></label></div>
+    <div className="hm-category-grid">{categories.map((c,i)=>{const Icon=c.icon;return <button key={c.id} className={category===c.id?"selected":""} onClick={()=>setCategory(c.id)}><span><Icon size={22}/></span><b>{categoryNames[lang][i]}</b></button>;})}</div>
+    <div className="hm-product-heading"><span>{t.all}</span><h3>{activeCat}</h3><small>01 — 50</small></div>
+    <div className="hm-product-grid">{Array.from({length:50},(_,i)=>{const p=shown[i]||(!categoryProducts.length?makePlaceholder(i+1):null);if(!p)return null;return <article className="hm-product-card" key={p.id} onClick={()=>openProduct(p)} role="button" tabIndex={0} onKeyDown={e=>{if(e.key==="Enter")openProduct(p);}}><div className="hm-product-image">{p.imageUrl?<img src={p.imageUrl} alt={p.title}/>:<div className="hm-placeholder"><span>H</span><small>{t.placeholder}</small><i>{String(i+1).padStart(2,"0")}</i></div>}<button className="hm-heart" aria-label="Save item" onClick={e=>{e.stopPropagation();openProduct(p);}}><Heart size={16}/></button><span className="hm-view">{t.select}<ArrowRight size={13}/></span></div><div className="hm-product-info"><span>{p.title||"HELPMEY · EDITION"}</span><div className="hm-product-options"><small>{t.price}</small><b>{fmt(p.price)}</b></div><div className="hm-product-options"><small>{t.size}</small><small>{t.color}</small></div></div></article>;})}</div>
+    {!categoryProducts.length&&<p className="hm-inventory-note">{t.noProducts}</p>}
+   </section>
+   <section className="hm-shipping" id="shipping"><div className="hm-wrap"><span className="hm-eyebrow">{t.shipping}</span><h2>{t.carrier}</h2><div className="hm-carriers">{carriers.map(c=><div key={c} className={"hm-carrier hm-"+c.toLowerCase()}>{c}</div>)}</div></div></section>
+   <section className="hm-tracking hm-wrap"><div><span className="hm-eyebrow">{t.help}</span><h2>{t.tracking}</h2></div><div className="hm-track-form"><input value={trackNo} onChange={e=>setTrackNo(e.target.value)} placeholder={t.trackingHint}/><button className="hm-gold-button" onClick={track}>{t.track}<ArrowRight size={14}/></button>{trackMessage&&<p role="status">{trackMessage}</p>}</div></section>
+   <section className="hm-newsletter"><div className="hm-wrap hm-newsletter-inner"><div><span className="hm-eyebrow">HELPMEY PRIVATE NOTES</span><h2>{t.newsletter}</h2><p>{t.newsletterText}</p></div><form onSubmit={e=>{e.preventDefault();(e.currentTarget.querySelector("button") as HTMLButtonElement).textContent="✓";}}><input type="email" required placeholder={t.email}/><button>{t.subscribe}<ArrowRight size={14}/></button></form></div></section>
+  </main>
+  <footer className="hm-footer" id="footer"><div className="hm-wrap"><div className="hm-footer-main"><div className="hm-footer-brand"><div className="hm-crest"><Crown size={20}/><b>H</b></div><strong>Helpmey</strong><small>{t.tag}</small><p>{t.legalNote}</p></div><div><h4>{t.help}</h4><a href="mailto:info@digital-future.ai">info@digital-future.ai</a><a href="mailto:server@digital-future.ai">server@digital-future.ai</a><a href="#shipping">{t.shipping}</a></div><div><h4>{t.legal}</h4><button onClick={()=>{setLegal("imprint");setModal("legal");}}>{t.imprint}</button><button onClick={()=>{setLegal("terms");setModal("legal");}}>{t.terms}</button><button onClick={()=>{setLegal("privacy");setModal("legal");}}>{t.privacy}</button></div><div><h4>{t.follow}</h4><p>✧ &nbsp; Instagram &nbsp; · &nbsp; Pinterest</p><p>Worldwide · Neumünster, Germany</p></div></div><div className="hm-footer-bottom"><span>{t.rights}</span><span>HELPMEY · LUXURY BEYOND LIMITS</span></div></div></footer>
+  </main>
+  {modal&&<div className="hm-overlay" onClick={close}><section className="hm-modal" onClick={e=>e.stopPropagation()} role="dialog" aria-modal="true"><button className="hm-close" onClick={close} aria-label={t.close}><X/></button><div className="hm-modal-crest"><Crown size={19}/><b>H</b></div>
+   {modal==="product"&&active&&<><span className="hm-eyebrow">{activeCat}</span><h2>{active.title||"Helpmey · Private Selection"}</h2><div className="hm-detail-image">{active.imageUrl?<img src={active.imageUrl} alt={active.title}/>:<span>H</span>}</div><p>{active.description||t.placeholder}</p><div className="hm-field-grid"><label>{t.price}<strong>{fmt(active.price)}</strong></label><label>{t.size}<select value={size} onChange={e=>setSize(e.target.value)}>{(active.sizes||["One size","S","M","L","XL"]).map(v=><option key={v}>{v}</option>)}</select></label><label>{t.color}<select value={color} onChange={e=>setColor(e.target.value)}>{(active.colors||["Gold","Black","Ivory","Champagne","Silver"]).map(v=><option key={v}>{v}</option>)}</select></label></div><button className="hm-gold-button hm-wide" onClick={reserve}>{t.continue}<ArrowRight size={15}/></button></>}
+   {modal==="reserve"&&active&&<><span className="hm-eyebrow">{t.reserve}</span><h2>{t.reserved}</h2><p>{active.title||activeCat} · {size} · {color}</p><label className="hm-quantity">{t.quantity}<span><button onClick={()=>setQty(Math.max(1,qty-1))}><Minus size={14}/></button><b>{qty}</b><button onClick={()=>setQty(Math.min(50,qty+1))}><Plus size={14}/></button></span></label><div className="hm-modal-total"><span>{t.subtotal}</span><b>{active.price===undefined?"Price on request":fmt(active.price*qty)}</b></div><button className="hm-gold-button hm-wide" onClick={add}>{t.add}<ArrowRight size={15}/></button></>}
+   {modal==="payment"&&<><span className="hm-eyebrow">{t.payment}</span><h2>{paymentDone?"Thank you":"Your private checkout"}</h2>{paymentDone?<p>{t.reserved}</p>:<><div className="hm-payment-visual"><CreditCard size={28}/><span>•••• &nbsp; •••• &nbsp; •••• &nbsp; 2026</span><small>HELPMEY MEMBER</small></div><div className="hm-modal-total"><span>{t.subtotal}</span><b>{fmt(subtotal)}</b></div><p className="hm-demo-note">{t.mock}</p><button className="hm-gold-button hm-wide" onClick={()=>setPaymentDone(true)}>{t.pay}<ShieldCheck size={15}/></button></>}</>}
+   {modal==="cart"&&<><span className="hm-eyebrow">{t.cart}</span><h2>{t.cart}</h2>{!cart.length?<p>{t.empty}</p>:cart.map(line=><div className="hm-cart-line" key={line.key}><div><b>{line.product.title||"Helpmey · "+line.product.category}</b><small>{line.size} · {line.color}</small><div className="hm-cart-qty"><button onClick={()=>setCart(old=>old.map(x=>x.key===line.key?{...x,qty:Math.max(1,x.qty-1)}:x))}><Minus size={12}/></button>{line.qty}<button onClick={()=>setCart(old=>old.map(x=>x.key===line.key?{...x,qty:x.qty+1}:x))}><Plus size={12}/></button><button onClick={()=>setCart(old=>old.filter(x=>x.key!==line.key))}><X size={12}/></button></div></div><strong>{line.product.price===undefined?"—":fmt(line.product.price*line.qty)}</strong></div>)}<div className="hm-modal-total"><span>{t.subtotal}</span><b>{fmt(subtotal)}</b></div><button className="hm-gold-button hm-wide" disabled={!cart.length} onClick={()=>setModal("payment")}>{t.continue}<ArrowRight size={15}/></button></>}
+   {modal==="legal"&&<><span className="hm-eyebrow">{t.legal}</span><h2>{legalContent[legal][0]}</h2><div className="hm-legal-copy">{legalContent[legal].slice(1).map((line,i)=><p key={i}>{line}</p>)}</div></>}
+   {modal==="tracking"&&<><h2>{t.tracking}</h2><p>{trackMessage}</p></>}
+  </section></div>}
+ </div>;
 }
