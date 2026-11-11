@@ -7,7 +7,8 @@ type CookieUpdate = { name: string; value: string; options?: CookieOptions };
 function securityPolicy(nonce: string): string {
   return [
     "default-src 'self'",
-    "script-src 'self' 'nonce-" + nonce + "' 'strict-dynamic' https://js.stripe.com",
+    // Next.js dev mode evaluates code for hot reload; production keeps eval blocked.
+    "script-src 'self' 'nonce-" + nonce + "' 'strict-dynamic' https://js.stripe.com" + (process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""),
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data: https:",

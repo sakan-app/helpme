@@ -3,6 +3,12 @@ node_modules
 .env
 .env.*
 !.env.example
+!.env.production
+.open-next/
+.wrangler/
+.dev.vars*
+next-env.d.ts
+tsconfig.tsbuildinfo
 *.log
 .DS_Store
 coverage

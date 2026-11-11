@@ -53,6 +53,18 @@ Apply SQL migrations in `supabase/migrations/` to your Supabase project. Row-lev
 
 Deploy the `backend/` directory as the project root in a Node.js host such as Vercel. Set all environment values in the host's encrypted environment settings. Do not deploy this Next.js app as GitHub Pages: GitHub Pages cannot execute Next.js API routes or server-side authentication.
 
+### Cloudflare Workers (current host)
+
+The live shop runs as the Worker `helpme-cf` (https://helpme-cf.sakanapp65.workers.dev) through OpenNext (`open-next.config.ts`, `wrangler.jsonc`). Cloudflare Workers Builds deploys every push to `main`:
+
+- Root directory: `backend`
+- Build command: `npx opennextjs-cloudflare build`
+- Deploy command: `npx opennextjs-cloudflare deploy`
+
+Public build-time values (Supabase URL, publishable key, site URL) are in `.env.production`. Plain runtime settings are in `wrangler.jsonc` under `vars`; dashboard-only plain variables are reset by the next build. Secrets are set in the Cloudflare dashboard as type **Secret**: `SUPABASE_SERVICE_ROLE_KEY`, `SMTP_PASS`, and later the Stripe/PayPal keys. `npm run preview` builds and runs the Worker locally.
+
+Without Upstash, rate limiting uses the `rate_limit_counters` table and `rate_limit_hit` function from migration 005 through the service-role key. The root `index.html` on GitHub Pages only redirects to the Worker.
+
 ## Scope and launch status
 
 The storefront includes the four requested sample products, category/search filtering, variant selection, local cart and wishlist state, multilingual UI labels, and Supabase account UI. Payment is deliberately not represented as live: a real checkout requires a payment provider account, server-side order creation, verified webhooks, tax/shipping configuration and end-to-end testing. CJ Dropshipping also requires supplier credentials and a server-side sync job before inventory/prices can be live. Legal text is a draft and must be reviewed against the actual business details and current German/EU law before publication.

@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import {
   ArrowLeft, ArrowRight, Bluetooth, BriefcaseBusiness, Check, ChevronDown, Crown,
   Gem, Heart, Laptop, Menu, Minus, Monitor, Package, Plus, Search, ShieldCheck,
   ShoppingBag, Smartphone, Sparkles, Watch, X, Footprints, Shirt, Dumbbell,
-  ShirtIcon, ShoppingBasket, CreditCard, Globe2
+  ShirtIcon, ShoppingBasket, CreditCard, Globe2, UserRound
 } from "lucide-react";
 
 type Locale = "DE" | "EN" | "AR";
@@ -13,6 +13,7 @@ type Department = { id: string; de: string; en: string; ar: string; icon: typeof
 type Product = { id: string; title: string; category: string; price?: number; currency?: string; sizes?: string[]; colors?: string[]; imageUrl?: string | null; description?: string; };
 type Line = { id: string; product: Product; size: string; color: string; quantity: number; };
 type Step = "catalog" | "product" | "summary" | "checkout";
+type User = { id: string; email?: string | null };
 
 const departments: Department[] = [
   { id:"sneakers", de:"Sneaker", en:"Sneakers", ar:"أحذية رياضية", icon:Footprints },
@@ -30,9 +31,9 @@ const departments: Department[] = [
 ];
 
 const words = {
-  DE: { tagline:"DIE KUNST DES BESONDEREN", headline:"Zeitlose Eleganz. Außergewöhnliche Auswahl.", intro:"Entdecken Sie eine kuratierte Welt aus Design, Stil und moderner Lebensart.", explore:"Kollektion entdecken", all:"Alle Kategorien", search:"Kollektion durchsuchen …", size:"Größe / Modell", color:"Farbe", price:"Preis", quantity:"Menge", continue:"Weiter", add:"In den Warenkorb", back:"Zurück", summary:"Ihre Auswahl", count:"Anzahl", type:"Kategorie", confirm:"Auswahl bestätigen", checkout:"Sicher zur Kasse", cart:"Warenkorb", empty:"Ihr Warenkorb ist noch leer.", subtotal:"Zwischensumme", payment:"Zahlung", secure:"Sichere Zahlungsabwicklung", cardholder:"Karteninhaber", cardnumber:"Kartennummer", expiry:"Ablaufdatum", cvv:"Prüfnummer", pay:"Zahlung fortsetzen", demo:"Zahlungsanbieter noch nicht verbunden. Es werden keine Kartendaten verarbeitet.", placeholder:"Produktbild folgt", select:"Auswählen", items:"Artikel", language:"Sprache", inventory:"Aus dem Sortiment", unavailable:"Preis und Varianten werden nach Anbindung des Inventars angezeigt." },
-  EN: { tagline:"THE ART OF DISTINCTION", headline:"Timeless elegance. An exceptional edit.", intro:"Discover a curated world of design, personal style and modern living.", explore:"Explore the collection", all:"All departments", search:"Search the collection …", size:"Size / Model", color:"Color", price:"Price", quantity:"Quantity", continue:"Continue", add:"Add to bag", back:"Back", summary:"Your selection", count:"Count", type:"Department", confirm:"Confirm selection", checkout:"Secure checkout", cart:"Shopping bag", empty:"Your bag is empty.", subtotal:"Subtotal", payment:"Payment", secure:"Secure payment experience", cardholder:"Cardholder", cardnumber:"Card number", expiry:"Expiry date", cvv:"Security code", pay:"Continue to payment", demo:"Payment provider not connected. No card details are processed.", placeholder:"Product image coming soon", select:"Select", items:"Items", language:"Language", inventory:"From our collection", unavailable:"Price and variants appear once inventory is connected." },
-  AR: { tagline:"فن التميز", headline:"أناقة خالدة. مجموعة استثنائية.", intro:"اكتشف عالماً منتقى من التصميم والأناقة وأسلوب الحياة العصري.", explore:"اكتشف المجموعة", all:"جميع الأقسام", search:"ابحث في المجموعة …", size:"المقاس / الطراز", color:"اللون", price:"السعر", quantity:"الكمية", continue:"متابعة", add:"أضف إلى السلة", back:"رجوع", summary:"اختياراتك", count:"العدد", type:"القسم", confirm:"تأكيد الاختيار", checkout:"الدفع الآمن", cart:"سلة التسوق", empty:"سلتك فارغة حالياً.", subtotal:"المجموع الفرعي", payment:"الدفع", secure:"تجربة دفع آمنة", cardholder:"حامل البطاقة", cardnumber:"رقم البطاقة", expiry:"تاريخ الانتهاء", cvv:"رمز الأمان", pay:"متابعة الدفع", demo:"لم يتم ربط مزود الدفع بعد. لن تتم معالجة بيانات البطاقة.", placeholder:"صورة المنتج قريباً", select:"اختر", language:"اللغة", inventory:"من مجموعتنا", unavailable:"سيظهر السعر والخيارات بعد ربط المخزون." }
+  DE: { tagline:"DIE KUNST DES BESONDEREN", headline:"Zeitlose Eleganz. Außergewöhnliche Auswahl.", intro:"Entdecken Sie eine kuratierte Welt aus Design, Stil und moderner Lebensart.", explore:"Kollektion entdecken", all:"Alle Kategorien", search:"Kollektion durchsuchen …", size:"Größe / Modell", color:"Farbe", price:"Preis", quantity:"Menge", continue:"Weiter", add:"In den Warenkorb", back:"Zurück", summary:"Ihre Auswahl", count:"Anzahl", type:"Kategorie", confirm:"Auswahl bestätigen", checkout:"Sicher zur Kasse", cart:"Warenkorb", empty:"Ihr Warenkorb ist noch leer.", subtotal:"Zwischensumme", payment:"Zahlung", secure:"Sichere Zahlungsabwicklung", cardholder:"Karteninhaber", cardnumber:"Kartennummer", expiry:"Ablaufdatum", cvv:"Prüfnummer", pay:"Zahlung fortsetzen", demo:"Zahlungsanbieter noch nicht verbunden. Es werden keine Kartendaten verarbeitet.", placeholder:"Produktbild folgt", select:"Auswählen", items:"Artikel", language:"Sprache", inventory:"Aus dem Sortiment", unavailable:"Preis und Varianten werden nach Anbindung des Inventars angezeigt.", account:"Konto", login:"Anmelden", signup:"Registrieren", email:"E-Mail", password:"Passwort", logout:"Abmelden", signedIn:"Angemeldet als", wait:"Bitte warten …", passwordRule:"Mindestens 12 Zeichen mit Groß- und Kleinbuchstaben und einer Zahl.", failed:"Die Anfrage konnte nicht verarbeitet werden." },
+  EN: { tagline:"THE ART OF DISTINCTION", headline:"Timeless elegance. An exceptional edit.", intro:"Discover a curated world of design, personal style and modern living.", explore:"Explore the collection", all:"All departments", search:"Search the collection …", size:"Size / Model", color:"Color", price:"Price", quantity:"Quantity", continue:"Continue", add:"Add to bag", back:"Back", summary:"Your selection", count:"Count", type:"Department", confirm:"Confirm selection", checkout:"Secure checkout", cart:"Shopping bag", empty:"Your bag is empty.", subtotal:"Subtotal", payment:"Payment", secure:"Secure payment experience", cardholder:"Cardholder", cardnumber:"Card number", expiry:"Expiry date", cvv:"Security code", pay:"Continue to payment", demo:"Payment provider not connected. No card details are processed.", placeholder:"Product image coming soon", select:"Select", items:"Items", language:"Language", inventory:"From our collection", unavailable:"Price and variants appear once inventory is connected.", account:"Account", login:"Sign in", signup:"Create account", email:"Email", password:"Password", logout:"Sign out", signedIn:"Signed in as", wait:"Please wait …", passwordRule:"At least 12 characters with upper and lower case letters and a number.", failed:"The request could not be completed." },
+  AR: { tagline:"فن التميز", headline:"أناقة خالدة. مجموعة استثنائية.", intro:"اكتشف عالماً منتقى من التصميم والأناقة وأسلوب الحياة العصري.", explore:"اكتشف المجموعة", all:"جميع الأقسام", search:"ابحث في المجموعة …", size:"المقاس / الطراز", color:"اللون", price:"السعر", quantity:"الكمية", continue:"متابعة", add:"أضف إلى السلة", back:"رجوع", summary:"اختياراتك", count:"العدد", type:"القسم", confirm:"تأكيد الاختيار", checkout:"الدفع الآمن", cart:"سلة التسوق", empty:"سلتك فارغة حالياً.", subtotal:"المجموع الفرعي", payment:"الدفع", secure:"تجربة دفع آمنة", cardholder:"حامل البطاقة", cardnumber:"رقم البطاقة", expiry:"تاريخ الانتهاء", cvv:"رمز الأمان", pay:"متابعة الدفع", demo:"لم يتم ربط مزود الدفع بعد. لن تتم معالجة بيانات البطاقة.", placeholder:"صورة المنتج قريباً", select:"اختر", language:"اللغة", inventory:"من مجموعتنا", unavailable:"سيظهر السعر والخيارات بعد ربط المخزون.", account:"الحساب", login:"تسجيل الدخول", signup:"إنشاء حساب", email:"البريد الإلكتروني", password:"كلمة المرور", logout:"تسجيل الخروج", signedIn:"تم تسجيل الدخول باسم", wait:"يرجى الانتظار …", passwordRule:"12 حرفاً على الأقل مع أحرف كبيرة وصغيرة ورقم.", failed:"تعذر إكمال الطلب." }
 } satisfies Record<Locale, Record<string,string>>;
 
 const money = (price?: number, currency = "EUR", locale = "de-DE") => typeof price === "number" ? new Intl.NumberFormat(locale, { style:"currency", currency }).format(price) : "—";
@@ -56,6 +57,13 @@ export default function LuxuryStorefront() {
   const [step, setStep] = useState<Step>("catalog");
   const [cart, setCart] = useState<Line[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [authMessage, setAuthMessage] = useState("");
+  const [busy, setBusy] = useState(false);
   const t = words[locale];
   const rtl = locale === "AR";
 
@@ -66,7 +74,31 @@ export default function LuxuryStorefront() {
       .then(r => r.ok ? r.json() : Promise.reject(new Error("catalog unavailable")))
       .then(data => { if (Array.isArray(data.products)) setInventory(data.products); })
       .catch(() => {});
+    fetch("/api/auth/user", { cache:"no-store" })
+      .then(r => r.ok ? r.json() : { user: null })
+      .then(data => setUser(data.user ?? null))
+      .catch(() => setUser(null));
   }, []);
+
+  const submitAuth = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); setBusy(true); setAuthMessage("");
+    try {
+      const response = await fetch(authMode === "signup" ? "/api/auth/signup" : "/api/auth/login", {
+        method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ email, password })
+      });
+      const data = await response.json().catch(() => ({})) as { error?: string; message?: string; user?: User | null };
+      if (!response.ok) throw new Error(data.error ?? t.failed);
+      if (authMode === "login" && data.user) { setUser(data.user); setPassword(""); }
+      else setAuthMessage(data.message ?? "");
+    } catch (error) { setAuthMessage(error instanceof Error ? error.message : t.failed); }
+    finally { setBusy(false); }
+  };
+  const signOut = async () => {
+    setBusy(true);
+    try { if ((await fetch("/api/auth/logout", { method:"POST" })).ok) { setUser(null); setAuthMessage(""); } else setAuthMessage(t.failed); }
+    catch { setAuthMessage(t.failed); }
+    finally { setBusy(false); }
+  };
   useEffect(() => { try { localStorage.setItem("helpmey_luxury_cart", JSON.stringify(cart)); } catch {} }, [cart]);
 
   const activeDepartment = departments.find(d => d.id === department)!;
@@ -75,7 +107,7 @@ export default function LuxuryStorefront() {
       sneakers:["sneaker","shoe","shoes","schuh"], smartphones:["smartphone","phone","telefon"], computers:["computer","laptop","notebook"],
       bluetooth:["bluetooth","audio","headphone","kopfhörer"], "womens-clothing":["damen","women","clothing","bekleidung"],
       innerwear:["underwear","innerwear","wäsche","unterwäsche"], eveningwear:["evening","abend","dress","kleid"],
-      "mens-suits":["suit","anzug","menswear","herren"], perfumes:["perfume","parfum","fragrance","duft"],
+      "mens-suits":["suit","anzug","menswear","herren"], perfumes:["perfume","parfum","parfüm","fragrance","duft"],
       watches:["watch","uhr"], "womens-bags":["bag","tasche","handbag"], sportswear:["sport","sportswear","leggings"]
     };
     const terms = departmentWords[department] || [department];
@@ -100,6 +132,7 @@ export default function LuxuryStorefront() {
       <a className="luxury-logo" href="#home" aria-label="Helpmey"><Crown size={23}/><span>HELPMEY</span><small>THE LUXURY EDIT</small></a>
       <div className="luxury-actions">
         <label className="luxury-language"><Globe2 size={15}/><select value={locale} onChange={e=>setLocale(e.target.value as Locale)} aria-label={t.language}><option value="DE">Deutsch</option><option value="EN">English</option><option value="AR">العربية</option></select></label>
+        <button onClick={()=>{setAuthMessage("");setAccountOpen(true);}} className="luxury-cart" aria-label={t.account}><UserRound size={17}/><span>{user ? t.account : t.login}</span></button>
         <button onClick={()=>setCartOpen(true)} className="luxury-cart"><ShoppingBag size={17}/><span>{t.cart}</span><b>{cartCount}</b></button>
       </div>
     </header>
@@ -137,5 +170,17 @@ export default function LuxuryStorefront() {
     <footer className="luxury-footer"><Crown size={21}/><span>HELPMEY</span><small>TIMELESS BY DESIGN · EST. 2025</small></footer>
 
     {cartOpen && <div className="luxury-overlay" onClick={()=>setCartOpen(false)}><aside className="luxury-cart-panel" onClick={e=>e.stopPropagation()}><button className="luxury-close" onClick={()=>setCartOpen(false)}><X/></button><span className="luxury-kicker">{t.cart}</span><h2>{t.cart}</h2>{cart.length===0?<p>{t.empty}</p>:cart.map(line=><div className="luxury-order-line" key={line.id}><span>{line.product.title || line.product.category} · {line.size} · {line.color} × {line.quantity}</span><strong>{money((line.product.price||0)*line.quantity,line.product.currency)}</strong></div>)}<div className="luxury-order-total"><span>{t.subtotal}</span><strong>{money(subtotal)}</strong></div><button className="luxury-primary full" disabled={!cart.length} onClick={()=>{setCartOpen(false);setStep("checkout")}}>{t.checkout}<ArrowRight size={15}/></button></aside></div>}
+
+    {accountOpen && <div className="luxury-overlay" onClick={()=>setAccountOpen(false)}><aside className="luxury-cart-panel" onClick={e=>e.stopPropagation()}><button className="luxury-close" onClick={()=>setAccountOpen(false)} aria-label="Close"><X/></button><span className="luxury-kicker">HELPMEY</span><h2>{user ? t.account : t[authMode]}</h2>
+      {user ? <div className="luxury-auth-form"><p>{t.signedIn} {user.email}</p><button className="luxury-primary full" disabled={busy} onClick={signOut}>{busy ? t.wait : t.logout}</button></div>
+      : <form className="luxury-auth-form" onSubmit={submitAuth}>
+        <label>{t.email}<input type="email" autoComplete="email" required value={email} onChange={e=>setEmail(e.target.value)}/></label>
+        <label>{t.password}<input type="password" autoComplete={authMode==="signup"?"new-password":"current-password"} minLength={authMode==="signup"?12:1} required value={password} onChange={e=>setPassword(e.target.value)}/></label>
+        {authMode==="signup" && <small>{t.passwordRule}</small>}
+        <button className="luxury-primary full" disabled={busy}>{busy ? t.wait : t[authMode]}</button>
+        <button type="button" className="luxury-auth-switch" onClick={()=>{setAuthMode(authMode==="login"?"signup":"login");setAuthMessage("");}}>{authMode==="login" ? t.signup : t.login}</button>
+      </form>}
+      {authMessage && <p className="luxury-auth-message" role="status">{authMessage}</p>}
+    </aside></div>}
   </div>;
 }

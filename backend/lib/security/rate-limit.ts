@@ -7,8 +7,21 @@ function digest(value: string): string {
   return createHash("sha256").update(value).digest("hex");
 }
 function clientIp(request: Request): string {
+  // Cloudflare sets cf-connecting-ip itself; the first x-forwarded-for entry can be supplied by the client.
   const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  return request.headers.get("x-real-ip")?.trim() || forwarded || "unknown";
+  return request.headers.get("cf-connecting-ip")?.trim() || request.headers.get("x-real-ip")?.trim() || forwarded || "unknown";
+}
+
+// Fallback store when Upstash is not configured: an atomic counter in Supabase (migration 005).
+function hasSupabaseStore(): boolean {
+  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+}
+async function supabaseIncrement(key: string, windowSeconds: number): Promise<[number, number]> {
+  const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
+  const { data, error } = await createSupabaseAdminClient().rpc("rate_limit_hit", { p_key: key, p_window_seconds: windowSeconds });
+  const row = Array.isArray(data) ? data[0] : data;
+  if (error || !row) throw new Error("Rate-limit storage unavailable.");
+  return [Number(row.request_count), Number(row.retry_after)];
 }
 
 async function redisCommand<T>(command: unknown[]): Promise<T> {
@@ -35,7 +48,11 @@ async function increment(key: string, limit: number, windowSeconds: number): Pro
     const ttl = Math.max(1, Number(result[1]));
     return { allowed: count <= limit, remaining: Math.max(0, limit - count), retryAfter: ttl };
   }
-  if (process.env.NODE_ENV === "production") throw new Error("Production rate limiting requires Upstash Redis.");
+  if (hasSupabaseStore()) {
+    const [count, ttl] = await supabaseIncrement(key, windowSeconds);
+    return { allowed: count <= limit, remaining: Math.max(0, limit - count), retryAfter: Math.max(1, ttl) };
+  }
+  if (process.env.NODE_ENV === "production") throw new Error("Production rate limiting requires Upstash Redis or Supabase.");
   const now = Date.now();
   const current = localWindows.get(key);
   const entry = !current || current.expiresAt <= now
@@ -61,6 +78,12 @@ export async function clearFailedLogin(request: Request, _email: string): Promis
   const key = `helpmey:login-fail:${digest(ip)}`;
   if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
     await redisCommand<number>(["DEL", key]);
+    return;
+  }
+  if (hasSupabaseStore()) {
+    const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
+    const { error } = await createSupabaseAdminClient().from("rate_limit_counters").delete().eq("key", key);
+    if (error) throw new Error("Rate-limit storage unavailable.");
     return;
   }
   if (process.env.NODE_ENV !== "production") localWindows.delete(key);

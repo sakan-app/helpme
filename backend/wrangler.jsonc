@@ -1,0 +1,36 @@
+// Cloudflare Workers config for the OpenNext build of the Helpmey Next.js app.
+// Secrets (SUPABASE_SERVICE_ROLE_KEY, SMTP_PASS, payment keys) are set in the Cloudflare dashboard
+// as type "Secret", never here. Plain variables live below because dashboard-only variables are reset
+// by the next Git build.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "helpme-cf",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-10-27",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "helpme-cf"
+    }
+  ],
+  "vars": {
+    // Exact HTTPS origin of this worker; used for auth email links and same-origin checks.
+    "APP_ORIGIN": "https://helpme-cf.sakanapp65.workers.dev",
+    "SMTP_HOST": "smtps.udag.de",
+    "SMTP_PORT": "465",
+    "SMTP_SECURE": "true",
+    "SMTP_USER": "info@digital-future.ai",
+    "SMTP_FROM": "Helpmey <info@digital-future.ai>",
+    "CONTACT_EMAIL": "contact@digital-future.ai",
+    "SERVER_EMAIL": "server@digital-future.ai",
+    "PAYPAL_API_BASE": "https://api-m.sandbox.paypal.com"
+  },
+  "observability": {
+    "enabled": true
+  }
+}
