@@ -14,8 +14,8 @@ import "./luxury-store.css";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Helpmey — Everyday Store",
-  description: "Zeitlose Essentials, Naturfasern, ehrliche Keramik und leise Accessoires. Helpmey Everyday Store.",
+  title: "Helpmey — Luxury Beyond Limits",
+  description: "Discover a world of timeless luxury, fashion, beauty, watches, jewellery and exceptional gifts at Helpmey. Luxury beyond limits.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com"),
   applicationName: "Helpmey",
   robots: { index: true, follow: true }
