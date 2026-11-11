@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Crown, ShoppingBag, Globe2, Search, Heart, X, Plus, Minus, ArrowRight, ArrowLeft, Sparkles, Watch, Gem, Gift, Shirt, BriefcaseBusiness, Flower2, Dumbbell, Truck, ShieldCheck, Package, CreditCard, MapPin, Mail, Instagram, ChevronDown } from "lucide-react";
+import { Crown, ShoppingBag, Globe2, Search, Heart, X, Plus, Minus, ArrowRight, ArrowLeft, Sparkles, Watch, Gem, Gift, Shirt, BriefcaseBusiness, Flower2, Dumbbell, Truck, ShieldCheck, Package, CreditCard, MapPin, Mail, Instagram, ChevronDown, UserRound } from "lucide-react";
 
 type Locale = "EN"|"DE"|"AR"|"FR"|"ES"|"IT"|"NL"|"TR"|"PL"|"ZH";
 type Product = { id:string; title:string; category:string; price?:number; currency?:string; imageUrl?:string|null; description?:string; sizes?:string[]; colors?:string[] };
 type CartLine = { key:string; product:Product; size:string; color:string; qty:number };
-type Modal = "product"|"reserve"|"payment"|"cart"|"legal"|"tracking"|null;
+type Modal = "product"|"reserve"|"payment"|"cart"|"legal"|"tracking"|"account"|null;
 const categories = [
   {id:"fashion",icon:Shirt},{id:"beauty",icon:Flower2},{id:"watches",icon:Watch},{id:"jewelry",icon:Gem},
   {id:"gifts",icon:Gift},{id:"bags",icon:BriefcaseBusiness},{id:"perfumes",icon:Sparkles},{id:"sportswear",icon:Dumbbell}
@@ -41,7 +41,7 @@ export default function LuxuryStorefront() {
  const [active,setActive]=useState<Product|null>(null), [size,setSize]=useState("One size"), [color,setColor]=useState("Gold");
  const [qty,setQty]=useState(1), [modal,setModal]=useState<Modal>(null), [legal,setLegal]=useState<"imprint"|"terms"|"privacy">("imprint");
  const [trackNo,setTrackNo]=useState(""), [trackMessage,setTrackMessage]=useState(""), [paymentDone,setPaymentDone]=useState(false);
- const [heroOk,setHeroOk]=useState(true);
+ const [heroOk,setHeroOk]=useState(true), [accountSubmitted,setAccountSubmitted]=useState(false);
  const t=words[lang], rtl=lang==="AR";
  useEffect(()=>{try{setCart(JSON.parse(localStorage.getItem("helpmey_cart")||"[]"));}catch{} fetch("/api/catalog",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(d=>{if(Array.isArray(d?.products))setProducts(d.products);}).catch(()=>{});},[]);
  useEffect(()=>{try{localStorage.setItem("helpmey_cart",JSON.stringify(cart));}catch{}},[cart]);
@@ -57,11 +57,11 @@ export default function LuxuryStorefront() {
  const fmt=(p?:number)=>euro(p);
  const activeCat=categoryNames[lang][categories.findIndex(c=>c.id===category)]||category;
  return <div className="hm-store" dir={rtl?"rtl":"ltr"}>
-  <div className="hm-language-bar"><span>PRIVATE CLIENT EXPERIENCE</span><label><Globe2 size={13}/><select aria-label="Language" value={lang} onChange={e=>setLang(e.target.value as Locale)}>{languages.map(l=><option key={l.id} value={l.id}>{l.label}</option>)}</select></label><span>COMPLIMENTARY WORLDWIDE DELIVERY</span></div>
-  <header className="hm-header"><a href="#home" className="hm-brand"><span className="hm-crest"><Crown size={22}/><b>H</b></span><strong>Helpmey</strong><small>{t.tag}</small></a><nav><a href="#collections">{t.collections}</a><a href="#shipping">{t.shipping}</a><a href="#footer">{t.help}</a></nav><div className="hm-head-actions"><button aria-label={t.cart} onClick={()=>setModal("cart")}><ShoppingBag size={20}/><i>{count}</i></button></div></header>
+  <div className="hm-language-bar"><span>PRIVATE CLIENT EXPERIENCE</span><span>COMPLIMENTARY WORLDWIDE DELIVERY</span></div>
+  <header className="hm-header"><a href="#home" className="hm-brand"><span className="hm-crest"><Crown size={22}/><b>H</b></span><strong>Helpmey</strong><small>{t.tag}</small></a><nav><a href="#collections">{t.collections}</a><a href="#shipping">{t.shipping}</a><a href="#footer">{t.help}</a></nav><div className="hm-head-actions"><label className="hm-nav-language" aria-label="Choose language"><Globe2 size={17}/><select aria-label="Language" value={lang} onChange={e=>setLang(e.target.value as Locale)}>{languages.map(l=><option key={l.id} value={l.id}>{l.label}</option>)}</select><ChevronDown size={12}/></label><a className="hm-nav-icon" href="#newsletter" aria-label="Membership and subscription"><Mail size={18}/></a><button aria-label={t.cart} onClick={()=>setModal("cart")}><ShoppingBag size={19}/><i>{count}</i></button><button className="hm-account-button" onClick={()=>{setAccountSubmitted(false);setModal("account");}}><UserRound size={15}/><span>Account / Register</span></button></div></header>
   <main>
    <section className="hm-hero" id="home">
-    {heroOk&&<img className="hm-hero-image" src="/helpmey-palace-hero.jpg" alt="Helpmey luxury palace storefront" onError={()=>setHeroOk(false)}/>}
+    {heroOk&&<><img className="hm-hero-backdrop" src="/helpmey-palace-hero.jpg" alt="" aria-hidden="true"/><img className="hm-hero-image" src="/helpmey-palace-hero.jpg" alt="Helpmey luxury palace storefront" onError={()=>setHeroOk(false)}/></>}
     <div className="hm-hero-shade"/><div className="hm-hero-copy"><div className="hm-overline"><span/> {t.tag} <span/></div><h1>{t.hero}</h1><p>{t.intro}</p><a className="hm-gold-button" href="#collections">{t.shop}<ArrowRight size={15}/></a></div>
     <div className="hm-hero-stamp"><div className="hm-stamp-crown"><Crown/></div><b>H</b><span>HELPMEY</span><small>EST. 2025</small></div>
    </section>
@@ -73,7 +73,7 @@ export default function LuxuryStorefront() {
    </section>
    <section className="hm-shipping" id="shipping"><div className="hm-wrap"><span className="hm-eyebrow">{t.shipping}</span><h2>{t.carrier}</h2><div className="hm-carriers">{carriers.map(c=><div key={c} className={"hm-carrier hm-"+c.toLowerCase()}>{c}</div>)}</div></div></section>
    <section className="hm-tracking hm-wrap"><div><span className="hm-eyebrow">{t.help}</span><h2>{t.tracking}</h2></div><div className="hm-track-form"><input value={trackNo} onChange={e=>setTrackNo(e.target.value)} placeholder={t.trackingHint}/><button className="hm-gold-button" onClick={track}>{t.track}<ArrowRight size={14}/></button>{trackMessage&&<p role="status">{trackMessage}</p>}</div></section>
-   <section className="hm-newsletter"><div className="hm-wrap hm-newsletter-inner"><div><span className="hm-eyebrow">HELPMEY PRIVATE NOTES</span><h2>{t.newsletter}</h2><p>{t.newsletterText}</p></div><form onSubmit={e=>{e.preventDefault();(e.currentTarget.querySelector("button") as HTMLButtonElement).textContent="✓";}}><input type="email" required placeholder={t.email}/><button>{t.subscribe}<ArrowRight size={14}/></button></form></div></section>
+   <section className="hm-newsletter" id="newsletter"><div className="hm-wrap hm-newsletter-inner"><div><span className="hm-eyebrow">HELPMEY PRIVATE NOTES</span><h2>{t.newsletter}</h2><p>{t.newsletterText}</p></div><form onSubmit={e=>{e.preventDefault();(e.currentTarget.querySelector("button") as HTMLButtonElement).textContent="✓";}}><input type="email" required placeholder={t.email}/><button>{t.subscribe}<ArrowRight size={14}/></button></form></div></section>
   </main>
   <footer className="hm-footer" id="footer"><div className="hm-wrap"><div className="hm-footer-main"><div className="hm-footer-brand"><div className="hm-crest"><Crown size={20}/><b>H</b></div><strong>Helpmey</strong><small>{t.tag}</small><p>{t.legalNote}</p></div><div><h4>{t.help}</h4><a href="mailto:info@digital-future.ai">info@digital-future.ai</a><a href="mailto:server@digital-future.ai">server@digital-future.ai</a><a href="#shipping">{t.shipping}</a></div><div><h4>{t.legal}</h4><button onClick={()=>{setLegal("imprint");setModal("legal");}}>{t.imprint}</button><button onClick={()=>{setLegal("terms");setModal("legal");}}>{t.terms}</button><button onClick={()=>{setLegal("privacy");setModal("legal");}}>{t.privacy}</button></div><div><h4>{t.follow}</h4><p>✧ &nbsp; Instagram &nbsp; · &nbsp; Pinterest</p><p>Worldwide · Neumünster, Germany</p></div></div><div className="hm-footer-bottom"><span>{t.rights}</span><span>HELPMEY · LUXURY BEYOND LIMITS</span></div></div></footer>
   {modal&&<div className="hm-overlay" onClick={close}><section className="hm-modal" onClick={e=>e.stopPropagation()} role="dialog" aria-modal="true"><button className="hm-close" onClick={close} aria-label={t.close}><X/></button><div className="hm-modal-crest"><Crown size={19}/><b>H</b></div>
@@ -82,7 +82,7 @@ export default function LuxuryStorefront() {
    {modal==="payment"&&<><span className="hm-eyebrow">{t.payment}</span><h2>{paymentDone?"Thank you":"Your private checkout"}</h2>{paymentDone?<p>{t.reserved}</p>:<><div className="hm-payment-visual"><CreditCard size={28}/><span>•••• &nbsp; •••• &nbsp; •••• &nbsp; 2026</span><small>HELPMEY MEMBER</small></div><div className="hm-modal-total"><span>{t.subtotal}</span><b>{fmt(subtotal)}</b></div><p className="hm-demo-note">{t.mock}</p><button className="hm-gold-button hm-wide" onClick={()=>setPaymentDone(true)}>{t.pay}<ShieldCheck size={15}/></button></>}</>}
    {modal==="cart"&&<><span className="hm-eyebrow">{t.cart}</span><h2>{t.cart}</h2>{!cart.length?<p>{t.empty}</p>:cart.map(line=><div className="hm-cart-line" key={line.key}><div><b>{line.product.title||"Helpmey · "+line.product.category}</b><small>{line.size} · {line.color}</small><div className="hm-cart-qty"><button onClick={()=>setCart(old=>old.map(x=>x.key===line.key?{...x,qty:Math.max(1,x.qty-1)}:x))}><Minus size={12}/></button>{line.qty}<button onClick={()=>setCart(old=>old.map(x=>x.key===line.key?{...x,qty:x.qty+1}:x))}><Plus size={12}/></button><button onClick={()=>setCart(old=>old.filter(x=>x.key!==line.key))}><X size={12}/></button></div></div><strong>{line.product.price===undefined?"—":fmt(line.product.price*line.qty)}</strong></div>)}<div className="hm-modal-total"><span>{t.subtotal}</span><b>{fmt(subtotal)}</b></div><button className="hm-gold-button hm-wide" disabled={!cart.length} onClick={()=>setModal("payment")}>{t.continue}<ArrowRight size={15}/></button></>}
    {modal==="legal"&&<><span className="hm-eyebrow">{t.legal}</span><h2>{legalContent[legal][0]}</h2><div className="hm-legal-copy">{legalContent[legal].slice(1).map((line,i)=><p key={i}>{line}</p>)}</div></>}
-   {modal==="tracking"&&<><h2>{t.tracking}</h2><p>{trackMessage}</p></>}
+   {modal==="tracking"&&<><h2>{t.tracking}</h2><p>{trackMessage}</p></>}{modal==="account"&&<><span className="hm-eyebrow">HELPMEY PRIVATE CLIENT</span><h2>{accountSubmitted?"Welcome to Helpmey":"Create your account"}</h2>{accountSubmitted?<p>Your registration request has been received in this storefront demo.</p>:<form className="hm-account-form" onSubmit={e=>{e.preventDefault();setAccountSubmitted(true);}}><label>Full name<input required autoComplete="name" placeholder="Your name"/></label><label>Email address<input required type="email" autoComplete="email" placeholder="you@example.com"/></label><label>Password<input required type="password" minLength={8} autoComplete="new-password" placeholder="At least 8 characters"/></label><button className="hm-gold-button hm-wide" type="submit">Create account <ArrowRight size={15}/></button><p className="hm-demo-note">Front-end demonstration only. Connect your customer account service to enable secure registration and sign-in.</p></form>}</>}
   </section></div>}
  </div>;
 }
