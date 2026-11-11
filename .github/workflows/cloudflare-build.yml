@@ -35,4 +35,4 @@ jobs:
       - name: TypeScript validation
         run: npm run typecheck
       - name: Build Cloudflare Worker with OpenNext
-        run: npm run build
+        run: npm run build:worker
