@@ -6,7 +6,8 @@ import { Crown, ShoppingBag, Globe2, Search, Heart, X, Plus, Minus, ArrowRight, 
 type Locale = "EN"|"DE"|"AR"|"FR"|"ES"|"IT"|"NL"|"TR"|"PL"|"ZH";
 type Product = { id:string; title:string; category:string; price?:number; currency?:string; imageUrl?:string|null; description?:string; sizes?:string[]; colors?:string[] };
 type CartLine = { key:string; product:Product; size:string; color:string; qty:number };
-type Modal = "product"|"reserve"|"payment"|"cart"|"legal"|"tracking"|"account"|null;\ntype PaymentMethod = "mastercard"|"visa"|"paypal"|"stripe";
+type Modal = "product"|"reserve"|"payment"|"cart"|"legal"|"tracking"|"account"|null;
+type PaymentMethod = "mastercard"|"visa"|"paypal"|"stripe";
 const categories = [
   {id:"fashion",icon:Shirt},{id:"beauty",icon:Flower2},{id:"watches",icon:Watch},{id:"jewelry",icon:Gem},
   {id:"gifts",icon:Gift},{id:"bags",icon:BriefcaseBusiness},{id:"perfumes",icon:Sparkles},{id:"sportswear",icon:Dumbbell}
@@ -40,7 +41,8 @@ export default function LuxuryStorefront() {
  const [products,setProducts]=useState<Product[]>([]), [cart,setCart]=useState<CartLine[]>([]);
  const [active,setActive]=useState<Product|null>(null), [size,setSize]=useState("One size"), [color,setColor]=useState("Gold");
  const [qty,setQty]=useState(1), [modal,setModal]=useState<Modal>(null), [legal,setLegal]=useState<"imprint"|"terms"|"privacy">("imprint");
- const [trackNo,setTrackNo]=useState(""), [trackMessage,setTrackMessage]=useState(""), [paymentDone,setPaymentDone]=useState(false);\n const [paymentMethod,setPaymentMethod]=useState<PaymentMethod|null>(null), [paymentNotice,setPaymentNotice]=useState("");
+ const [trackNo,setTrackNo]=useState(""), [trackMessage,setTrackMessage]=useState(""), [paymentDone,setPaymentDone]=useState(false);
+ const [paymentMethod,setPaymentMethod]=useState<PaymentMethod|null>(null), [paymentNotice,setPaymentNotice]=useState("");
  const [heroOk,setHeroOk]=useState(true), [accountSubmitted,setAccountSubmitted]=useState(false);
  const t=words[lang], rtl=lang==="AR";
  useEffect(()=>{try{setCart(JSON.parse(localStorage.getItem("helpmey_cart")||"[]"));}catch{} fetch("/api/catalog",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(d=>{if(Array.isArray(d?.products))setProducts(d.products);}).catch(()=>{});},[]);
@@ -51,7 +53,8 @@ export default function LuxuryStorefront() {
  const makePlaceholder=(i:number):Product=>({id:category+"-placeholder-"+i,title:"",category,description:t.placeholder,price:undefined,sizes:["One size","S","M","L","XL"],colors:["Gold","Black","Ivory","Champagne","Silver"]});
  const openProduct=(p:Product)=>{setActive(p);setSize(p.sizes?.[0]||"One size");setColor(p.colors?.[0]||"Gold");setQty(1);setModal("product");};
  const reserve=()=>{if(!active)return;setModal("reserve");};
- const openPayment=()=>{setPaymentMethod(null);setPaymentNotice("");setPaymentDone(false);setModal("payment");};\n const add=()=>{if(!active)return;const key=[active.id,size,color].join("|");setCart(old=>old.some(x=>x.key===key)?old.map(x=>x.key===key?{...x,qty:x.qty+qty}:x):[...old,{key,product:active,size,color,qty}]);openPayment();};
+ const openPayment=()=>{setPaymentMethod(null);setPaymentNotice("");setPaymentDone(false);setModal("payment");};
+ const add=()=>{if(!active)return;const key=[active.id,size,color].join("|");setCart(old=>old.some(x=>x.key===key)?old.map(x=>x.key===key?{...x,qty:x.qty+qty}:x):[...old,{key,product:active,size,color,qty}]);openPayment();};
  const close=()=>{setModal(null);setPaymentDone(false);};
  const track=()=>setTrackMessage(trackNo.trim()?t.status:"Please enter a tracking number.");
  const fmt=(p?:number)=>euro(p);
