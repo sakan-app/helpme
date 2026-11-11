@@ -4,11 +4,12 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npx opennextjs-cloudflare build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
+    "preview": "npm run build && npx opennextjs-cloudflare preview",
+    "deploy": "npm run build && npx opennextjs-cloudflare deploy",
+    "build:next": "next build"
   },
   "dependencies": {
     "@fontsource/cormorant-garamond": "^5.3.0",
