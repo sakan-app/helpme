@@ -528,3 +528,38 @@
  .hm-head-actions>.hm-account-button{flex-basis:36px;width:36px!important;min-width:36px;height:36px}
  .hm-head-actions>.hm-nav-icon,.hm-head-actions>button:not(.hm-account-button){flex-basis:36px;width:36px;min-width:36px;height:36px}
 }
+
+
+/* Reliable, keyboard-accessible language picker */
+.hm-head-actions .hm-language-wrap{position:relative;display:flex;flex:0 0 62px;width:62px;min-width:62px;z-index:80}
+.hm-head-actions .hm-nav-language{
+ display:flex!important;position:relative;inset:auto;flex:0 0 62px;width:62px;min-width:62px;height:46px;
+ align-items:center;justify-content:center;gap:5px;padding:0 6px;cursor:pointer;
+ border:1px solid #c9a66d;background:#17130e;color:#f0dfb9;font-size:10px;letter-spacing:.08em;
+}
+.hm-nav-language span{display:inline!important;opacity:1!important;visibility:visible!important;color:inherit}
+.hm-language-menu{
+ position:absolute;top:calc(100% + 9px);left:0;z-index:120;width:190px;max-height:min(70vh,420px);overflow:auto;
+ padding:7px;background:#17130e;border:1px solid #c9a66d;box-shadow:0 16px 45px #000b;
+}
+.hm-language-menu button{
+ display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;
+ border:0;border-bottom:1px solid #c9a66d30;background:transparent;color:#f4ead9;text-align:left;
+ font:500 12px 'DM Sans',sans-serif;cursor:pointer;
+}
+.hm-language-menu button:hover,.hm-language-menu button.active{background:#c9a66d20;color:#e8c991}
+.hm-language-check{color:#e8c991;font-weight:700}
+.hm-store[dir="rtl"] .hm-language-menu{left:auto;right:0}
+@media(max-width:700px){
+ .hm-head-actions .hm-language-wrap{flex-basis:44px;width:44px;min-width:44px}
+ .hm-head-actions .hm-nav-language{flex-basis:44px;width:44px;min-width:44px;height:40px;gap:3px;padding:0 3px}
+ .hm-language-menu{width:170px;max-height:65vh}
+}
+/* Show the complete source photograph: contain never trims any edge. The soft backdrop fills unused aspect-ratio space. */
+.hm-hero{width:100vw;height:100vh;height:100svh;min-height:560px;margin-inline:calc(50% - 50vw);padding-top:139px;box-sizing:border-box;background:#100e0b;overflow:hidden}
+.hm-hero-backdrop{object-fit:cover!important;filter:blur(22px) brightness(.38) saturate(.75);transform:scale(1.08)}
+.hm-hero-image{object-fit:contain!important;object-position:center center!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;background:transparent}
+@media(max-width:700px){
+ .hm-hero{height:100svh;min-height:520px;padding-top:116px}
+ .hm-hero-image{object-fit:contain!important;object-position:center center!important}
+}
