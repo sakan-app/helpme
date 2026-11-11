@@ -1,3 +1,532 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@400;500;600&display=swap');
-.luxury-store{--lx-black:#10100f;--lx-panel:#191714;--lx-gold:#c5a46d;--lx-bright:#e7d3a8;--lx-ivory:#f4efe6;--lx-muted:#b4aa9a;min-height:100vh;background:var(--lx-black);color:var(--lx-ivory);font-family:'DM Sans',Arial,sans-serif}.luxury-store *{box-sizing:border-box}.luxury-store button,.luxury-store select,.luxury-store input{font:inherit}.luxury-store button{cursor:pointer}.luxury-topline{height:34px;border-bottom:1px solid #c5a46d33;display:flex;align-items:center;justify-content:space-between;padding:0 5vw;color:var(--lx-gold);font-size:9px;letter-spacing:.2em}.luxury-topline span:nth-child(2){font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:.3em}.luxury-header{height:94px;display:flex;align-items:center;justify-content:space-between;padding:0 5vw;border-bottom:1px solid #c5a46d33}.luxury-logo{display:flex;flex-direction:column;align-items:center;color:var(--lx-bright);text-decoration:none}.luxury-logo>span{font:600 25px 'Cormorant Garamond',serif;letter-spacing:.24em;margin-top:2px}.luxury-logo small{font-size:8px;letter-spacing:.28em;margin-top:3px}.luxury-actions{display:flex;align-items:center;gap:20px}.luxury-language,.luxury-cart{display:flex;align-items:center;gap:8px;color:var(--lx-bright);font-size:11px}.luxury-language select{background:transparent;color:inherit;border:0;padding:7px}.luxury-language option{background:#171512}.luxury-cart{border:1px solid #c5a46d66;padding:11px 14px;background:transparent}.luxury-cart b{display:grid;place-items:center;width:19px;height:19px;border-radius:50%;background:var(--lx-gold);color:#16120c}.luxury-departments{display:flex;justify-content:center;gap:0;padding:10px 2vw;border-bottom:1px solid #c5a46d33;overflow-x:auto;scrollbar-width:thin;scrollbar-color:#8b7048 #141311}.luxury-departments button{flex:0 0 auto;min-width:104px;display:flex;flex-direction:column;align-items:center;gap:7px;padding:10px 12px;border:0;border-bottom:1px solid transparent;background:transparent;color:#c6bcad;font-size:10px;white-space:nowrap}.luxury-departments button svg{color:var(--lx-gold)}.luxury-departments button.active,.luxury-departments button:hover{border-bottom-color:var(--lx-gold);color:var(--lx-bright);background:#c5a46d0a}.luxury-hero{min-height:390px;display:flex;align-items:center;justify-content:space-between;padding:65px max(8vw,30px);border-bottom:1px solid #c5a46d33;background:radial-gradient(ellipse at 76% 50%,#70583235,transparent 37%),linear-gradient(105deg,#141311,#191610 65%,#0d0d0c)}.luxury-hero-copy{max-width:670px}.luxury-kicker{color:var(--lx-gold);font-size:9px;letter-spacing:.25em;text-transform:uppercase}.luxury-hero h1,.luxury-flow>h1{font:400 clamp(38px,5.3vw,66px)/1.03 'Cormorant Garamond',Georgia,serif;margin:20px 0}.luxury-hero p{color:var(--lx-muted);font-size:13px;line-height:1.9;max-width:470px;margin-bottom:27px}.luxury-primary{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:46px;padding:0 22px;border:1px solid var(--lx-bright);background:linear-gradient(135deg,#e7d3a8,#a9854e);color:#17130e;font-size:10px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;text-decoration:none}.luxury-primary:hover{filter:brightness(1.08)}.luxury-primary:disabled{opacity:.45;cursor:not-allowed}.luxury-primary.full{width:100%;margin-top:12px}.luxury-seal{width:220px;height:220px;border:1px solid #c5a46d99;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--lx-gold);outline:1px solid #c5a46d55;outline-offset:9px;margin-right:5vw}.luxury-seal span{font:400 76px 'Cormorant Garamond',serif;line-height:.8}.luxury-seal small{font-size:8px;letter-spacing:.3em}.luxury-main{width:min(1440px,90%);margin:0 auto;padding:65px 0 80px}.luxury-section-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:27px}.luxury-section-head h2,.luxury-flow h2{font:400 38px 'Cormorant Garamond',serif;margin:8px 0 0}.luxury-search{display:flex;align-items:center;gap:10px;border-bottom:1px solid #c5a46d77;padding:10px;color:var(--lx-gold)}.luxury-search input{width:220px;background:transparent;border:0;outline:0;color:var(--lx-ivory);font-size:11px}.luxury-product-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px}.luxury-product-card{min-width:0;text-align:left;border:0;padding:0;background:transparent;color:inherit}.luxury-product-frame{position:relative;display:grid;place-items:center;aspect-ratio:4/5;border:1px solid #a9854e88;padding:8px;background:linear-gradient(145deg,#211d17,#11100e);overflow:hidden}.luxury-product-frame:before{content:'';position:absolute;inset:5px;border:1px solid #c5a46d55;pointer-events:none}.luxury-product-frame:after{content:'✦';position:absolute;bottom:8px;right:10px;color:var(--lx-gold);font-size:12px}.luxury-product-ornament{position:absolute;top:9px;left:50%;transform:translateX(-50%);color:var(--lx-bright);font-size:14px}.luxury-product-frame img{width:100%;height:100%;object-fit:cover}.luxury-product-placeholder{display:flex;flex-direction:column;align-items:center;gap:12px;color:#8e7753}.luxury-product-placeholder small{font-size:9px;letter-spacing:.08em}.luxury-product-placeholder b{font:400 27px 'Cormorant Garamond',serif;color:#c5a46d88}.luxury-quick-view{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:8px;padding:11px;background:#c5a46de8;color:#17130e;font-size:9px;letter-spacing:.12em;text-transform:uppercase;opacity:0;transition:opacity .2s}.luxury-product-card:hover .luxury-quick-view,.luxury-product-card:focus-visible .luxury-quick-view{opacity:1}.luxury-product-meta{display:flex;flex-direction:column;gap:6px;padding:12px 3px;color:#cfc5b6;font-size:10px}.luxury-product-meta strong{font:500 17px 'Cormorant Garamond',serif;color:var(--lx-bright)}.luxury-note{color:var(--lx-muted);font-size:11px;margin-top:22px}.luxury-flow{width:min(1120px,90%);min-height:60vh;margin:0 auto;padding:50px 0 90px}.luxury-back{display:inline-flex;align-items:center;gap:8px;background:transparent;border:0;color:var(--lx-gold);font-size:11px;margin-bottom:28px}.luxury-product-detail{display:grid;grid-template-columns:1.05fr .95fr;gap:65px;align-items:center}.luxury-detail-visual{min-height:480px;border:1px solid #c5a46d88;display:grid;place-items:center;background:radial-gradient(ellipse,#4b3b28,#191612 60%,#10100f)}.luxury-detail-visual img{width:100%;height:100%;max-height:580px;object-fit:contain}.luxury-empty-art{display:flex;flex-direction:column;align-items:center;gap:18px;color:var(--lx-gold)}.luxury-empty-art span{font:400 30px 'Cormorant Garamond',serif;letter-spacing:.3em}.luxury-detail-info h1{font:400 48px 'Cormorant Garamond',serif;margin:15px 0}.luxury-detail-info>p{color:var(--lx-muted);font-size:12px;line-height:1.8}.luxury-detail-price{display:block;color:var(--lx-bright);font:500 26px 'Cormorant Garamond',serif;margin:22px 0}.luxury-detail-info>label{display:flex;flex-direction:column;gap:8px;margin:16px 0;color:var(--lx-gold);font-size:10px;letter-spacing:.1em;text-transform:uppercase}.luxury-detail-info select{height:42px;background:#171512;border:1px solid #c5a46d55;color:var(--lx-ivory);padding:0 12px}.luxury-quantity{display:flex;align-items:center;gap:18px;color:var(--lx-ivory)}.luxury-quantity button{width:30px;height:30px;border:1px solid #c5a46d66;background:transparent;color:var(--lx-gold)}.luxury-summary-card{display:grid;grid-template-columns:110px 1fr auto;align-items:center;gap:25px;padding:28px;border:1px solid #c5a46d99;background:linear-gradient(120deg,#211c15,#151310)}.luxury-summary-monogram{width:95px;height:95px;border:1px solid #c5a46d88;border-radius:50%;display:grid;place-items:center;color:var(--lx-gold)}.luxury-summary-card span{color:var(--lx-gold);font-size:9px;letter-spacing:.15em;text-transform:uppercase}.luxury-summary-card h2{margin:7px 0;font-size:28px}.luxury-summary-card p{color:var(--lx-muted);font-size:11px}.luxury-summary-count{text-align:center;display:flex;flex-direction:column;gap:6px}.luxury-summary-count strong{font:400 40px 'Cormorant Garamond',serif;color:var(--lx-bright)}.luxury-summary-count small{color:var(--lx-muted)}.luxury-flow-actions{display:flex;align-items:center;justify-content:space-between;margin-top:28px}.luxury-checkout-grid{display:grid;grid-template-columns:1fr 1fr;gap:35px;align-items:start}.luxury-payment-card{aspect-ratio:1.6;max-width:480px;width:100%;padding:25px;border:1px solid #e0c38f;border-radius:13px;background:linear-gradient(135deg,#6d5430,#201b13 60%,#090909);box-shadow:0 20px 50px #0008;color:#f4e6c7}.luxury-payment-head,.luxury-card-foot{display:flex;align-items:center;justify-content:space-between}.luxury-chip{width:40px;height:30px;border:1px solid #e5c98e;border-radius:5px;margin:32px 0 15px;background:linear-gradient(135deg,#e8d7ad,#977747)}.luxury-card-number{font:400 clamp(15px,2vw,22px) 'Cormorant Garamond',serif;letter-spacing:.13em}.luxury-card-foot{margin-top:30px;font-size:9px;letter-spacing:.17em}.luxury-order-card{border:1px solid #c5a46d66;padding:25px;background:#171512}.luxury-order-card h2{font:400 27px 'Cormorant Garamond',serif;margin:0 0 20px}.luxury-order-line,.luxury-order-total{display:flex;justify-content:space-between;gap:15px;padding:13px 0;border-bottom:1px solid #ffffff16;color:#cfc5b6;font-size:11px}.luxury-order-line strong,.luxury-order-total strong{color:var(--lx-bright)}.luxury-order-total{font-size:13px;border:0;padding-top:20px}.luxury-order-card p{font-size:10px;line-height:1.7;color:var(--lx-muted)}.luxury-footer{display:flex;flex-direction:column;align-items:center;gap:8px;padding:36px 15px;border-top:1px solid #c5a46d33;color:var(--lx-gold)}.luxury-footer span{font:500 22px 'Cormorant Garamond',serif;letter-spacing:.3em}.luxury-footer small{font-size:8px;letter-spacing:.2em}.luxury-overlay{position:fixed;inset:0;z-index:80;display:flex;justify-content:flex-end;background:#000b}.luxury-cart-panel{position:relative;width:min(440px,100%);height:100%;overflow:auto;padding:40px 28px;background:#171512;border-left:1px solid var(--lx-gold)}.luxury-cart-panel h2{font:400 35px 'Cormorant Garamond',serif}.luxury-cart-panel>p{font-size:12px;color:var(--lx-muted)}.luxury-close{position:absolute;right:18px;top:18px;border:0;background:transparent;color:var(--lx-gold)}@media(max-width:1050px){.luxury-product-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.luxury-departments{justify-content:flex-start}}@media(max-width:700px){.luxury-topline{padding:0 14px;font-size:7px}.luxury-header{height:75px;padding:0 16px}.luxury-actions{gap:9px}.luxury-cart span{display:none}.luxury-departments{justify-content:flex-start}.luxury-departments button{min-width:94px}.luxury-hero{min-height:310px;padding:45px 23px}.luxury-seal{width:115px;height:115px;flex:0 0 115px;margin:0 5px}.luxury-seal span{font-size:43px}.luxury-seal svg{width:20px}.luxury-seal small{font-size:6px}.luxury-main{width:92%;padding:45px 0}.luxury-section-head{align-items:start;flex-direction:column}.luxury-search,.luxury-search input{width:100%}.luxury-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.luxury-product-meta{font-size:9px}.luxury-product-detail,.luxury-checkout-grid{grid-template-columns:1fr;gap:28px}.luxury-detail-visual{min-height:300px}.luxury-detail-info h1{font-size:38px}.luxury-summary-card{grid-template-columns:65px 1fr;gap:15px;padding:17px}.luxury-summary-monogram{width:60px;height:60px}.luxury-summary-count{grid-column:1/-1;flex-direction:row;align-items:center;justify-content:space-between}.luxury-flow{padding-top:32px}.luxury-payment-card{max-width:none}}
-.luxury-build-meta{display:block;margin-top:9px;color:#8f8069;font-size:8px;letter-spacing:.12em;text-align:center}
+.hm-store{--hm-ink:#100e0b;--hm-panel:#1b1711;--hm-gold:#c9a66d;--hm-light:#f0dfb9;--hm-ivory:#f6f0e6;--hm-muted:#c2b7a5;min-height:100vh;background:var(--hm-ink);color:var(--hm-ivory);font-family:'DM Sans',Arial,sans-serif}.hm-store *{box-sizing:border-box}.hm-store button,.hm-store input,.hm-store select{font:inherit}.hm-store button{cursor:pointer}.hm-language-bar{height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 5vw;background:#0a0908;border-bottom:1px solid #c9a66d55;color:#bda477;font-size:8px;letter-spacing:.2em}.hm-language-bar label{display:flex;align-items:center;gap:7px}.hm-language-bar select{border:0;background:transparent;color:#e5d5b4;font-size:10px;letter-spacing:.04em}.hm-language-bar option{background:#17130e}.hm-header{height:105px;padding:0 5vw;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;border-bottom:1px solid #c9a66d55;background:linear-gradient(180deg,#17130f,#0e0c09)}.hm-brand{justify-self:start;display:flex;flex-direction:column;align-items:center;color:var(--hm-light);text-decoration:none;line-height:1}.hm-brand strong,.hm-footer-brand>strong{font:500 31px 'Cormorant Garamond',Georgia,serif;letter-spacing:.06em}.hm-brand small,.hm-footer-brand>small{font-size:7px;letter-spacing:.2em;color:#d4bd91;margin-top:6px}.hm-crest{width:34px;height:34px;position:relative;display:grid;place-items:center;color:var(--hm-light)}.hm-crest b{position:absolute;top:10px;font:italic 17px Georgia,serif}.hm-header nav{display:flex;gap:clamp(18px,3vw,44px)}.hm-header nav a{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#e8ddc9}.hm-head-actions{justify-self:end}.hm-head-actions button{position:relative;display:grid;place-items:center;width:46px;height:46px;border:1px solid #c9a66d88;background:transparent;color:var(--hm-light)}.hm-head-actions i{position:absolute;top:-7px;right:-7px;display:grid;place-items:center;min-width:19px;height:19px;padding:0 4px;border-radius:50%;background:#d8b67e;color:#17120b;font-size:9px;font-style:normal;font-weight:700}.hm-hero{position:relative;min-height:580px;display:flex;align-items:center;overflow:hidden;background:radial-gradient(ellipse at 80% 45%,#73542c 0%,#21180e 45%,#100e0b 82%)}.hm-hero-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 48%}.hm-hero-shade{position:absolute;inset:0;background:linear-gradient(90deg,#100e0bf2 0%,#100e0be8 28%,#100e0b80 53%,#100e0b1c 100%),linear-gradient(0deg,#100e0b8a,transparent 40%)}.hm-hero-copy{position:relative;z-index:2;width:min(610px,48%);margin-left:9vw;padding:70px 0}.hm-overline,.hm-eyebrow{display:flex;align-items:center;gap:12px;color:#dfc28f;font-size:9px;letter-spacing:.27em;text-transform:uppercase}.hm-overline span{width:30px;height:1px;background:#d4b77e}.hm-hero h1{font:400 clamp(44px,6.1vw,82px)/.98 'Cormorant Garamond',Georgia,serif;color:#fff8eb;margin:24px 0 18px;text-shadow:0 3px 25px #0009}.hm-hero-copy p{max-width:430px;color:#e0d5c4;font-size:13px;line-height:1.9;margin:0 0 28px}.hm-gold-button{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:48px;padding:0 22px;border:1px solid #eed6a5;background:linear-gradient(135deg,#eed7a5,#b58b50);color:#19130b;font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;transition:transform .2s,filter .2s}.hm-gold-button:hover{transform:translateY(-2px);filter:brightness(1.08)}.hm-gold-button:disabled{opacity:.45;cursor:not-allowed;transform:none}.hm-hero-stamp{position:absolute;z-index:2;right:10%;top:50%;transform:translateY(-50%);width:190px;height:190px;border:1px solid #e4c68eaa;outline:1px solid #e4c68e66;outline-offset:9px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#f0d7a5;background:#1a130b44;box-shadow:0 0 65px #d7b16a22}.hm-hero-stamp>b{font:italic 80px/.85 'Cormorant Garamond',serif}.hm-hero-stamp>span{font:500 10px 'Cormorant Garamond',serif;letter-spacing:.3em}.hm-hero-stamp small{font-size:7px;letter-spacing:.25em;margin-top:7px}.hm-stamp-crown{margin-bottom:6px}.hm-wrap{width:min(1400px,88%);margin-inline:auto}.hm-collections{padding:84px 0 92px}.hm-section-head{display:flex;justify-content:space-between;align-items:end;gap:25px;margin-bottom:32px}.hm-section-head h2,.hm-shipping h2,.hm-tracking h2,.hm-newsletter h2{font:400 clamp(34px,4vw,48px) 'Cormorant Garamond',Georgia,serif;margin:9px 0 0}.hm-search{display:flex;align-items:center;gap:10px;width:min(290px,40%);border-bottom:1px solid #c9a66d77;padding:10px 2px;color:#d3b77f}.hm-search input{width:100%;border:0;outline:0;background:transparent;color:var(--hm-ivory);font-size:11px}.hm-category-grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:12px;margin-bottom:57px}.hm-category-grid button{min-height:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border:1px solid #c9a66d55;background:linear-gradient(145deg,#211b13,#15120e);color:#e4d5bb;transition:background .2s,border .2s,transform .2s}.hm-category-grid button:hover,.hm-category-grid button.selected{border-color:#e4c58d;background:linear-gradient(145deg,#3b2d1b,#19140e);transform:translateY(-3px)}.hm-category-grid button>span{width:43px;height:43px;display:grid;place-items:center;border:1px solid #c9a66d77;border-radius:50%;color:#d8b77d}.hm-category-grid button b{font-size:9px;font-weight:500;letter-spacing:.12em;text-transform:uppercase}.hm-product-heading{display:flex;align-items:end;gap:18px;margin-bottom:21px;border-bottom:1px solid #c9a66d44;padding-bottom:15px}.hm-product-heading span,.hm-product-heading small{color:#c9a66d;font-size:8px;letter-spacing:.2em;text-transform:uppercase}.hm-product-heading h3{margin:0;font:400 30px 'Cormorant Garamond',serif}.hm-product-heading small{margin-left:auto}.hm-product-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px}.hm-product-card{min-width:0;cursor:pointer}.hm-product-image{position:relative;aspect-ratio:4/5;display:grid;place-items:center;overflow:hidden;border:1px solid #c9a66d66;background:radial-gradient(ellipse at 50% 42%,#51402a,#211a11 62%,#14110d);transition:border .2s}.hm-product-card:hover .hm-product-image{border-color:#efd29b}.hm-product-image:before{content:'';position:absolute;inset:6px;border:1px solid #c9a66d55;pointer-events:none}.hm-product-image>img{width:100%;height:100%;object-fit:cover}.hm-placeholder{display:flex;flex-direction:column;align-items:center;gap:10px;color:#c9a66d}.hm-placeholder>span{font:italic 90px/.9 'Cormorant Garamond',serif;opacity:.72}.hm-placeholder small{font-size:8px;letter-spacing:.12em;color:#b7a17e}.hm-placeholder i{font:400 19px 'Cormorant Garamond',serif;color:#b4935e88;font-style:normal}.hm-heart{position:absolute;top:14px;right:14px;width:32px;height:32px;display:grid;place-items:center;border:1px solid #c9a66d77;border-radius:50%;background:#100e0bbd;color:#ecd9b6}.hm-view{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:8px;padding:12px;background:#d4b477ed;color:#181109;font-size:8px;letter-spacing:.15em;text-transform:uppercase;opacity:0;transition:opacity .2s}.hm-product-card:hover .hm-view,.hm-product-card:focus-visible .hm-view{opacity:1}.hm-product-info{padding:12px 3px;color:#e4d9c8}.hm-product-info>span{display:block;min-height:17px;font:500 14px 'Cormorant Garamond',serif;letter-spacing:.04em}.hm-product-options{display:flex;justify-content:space-between;gap:8px;margin-top:7px;color:#a99b85;font-size:8px;letter-spacing:.08em;text-transform:uppercase}.hm-product-options b{color:#e7d2a8;font:500 14px 'Cormorant Garamond',serif;text-transform:none}.hm-inventory-note{margin-top:20px;color:#a99b85;font-size:11px}.hm-shipping{padding:62px 0 70px;border-block:1px solid #c9a66d33;background:linear-gradient(100deg,#1a1510,#100e0b 50%,#1a1510)}.hm-shipping h2{font-size:34px}.hm-carriers{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:30px}.hm-carrier{min-height:75px;display:grid;place-items:center;border:1px solid #c9a66d44;background:#ffffff05;color:#e9ddc9;font-size:20px;font-weight:800;letter-spacing:-.04em}.hm-dhl{color:#f7d900;background:#241f0c}.hm-fedex{color:#c6a2ff}.hm-ups{color:#d9b37d}.hm-aramex{color:#e6a07e;font-size:17px}.hm-dpd{color:#d8a3a3}.hm-gls{color:#8ab4db}.hm-tracking{display:grid;grid-template-columns:1fr 1.2fr;align-items:center;gap:40px;padding-block:65px}.hm-tracking h2{font-size:38px}.hm-track-form{display:grid;grid-template-columns:1fr auto;gap:10px}.hm-track-form input,.hm-newsletter input{min-width:0;height:48px;border:1px solid #c9a66d66;padding:0 15px;background:#17130e;color:#f4ead9;font-size:11px}.hm-track-form p{grid-column:1/-1;color:#d8c49f;font-size:11px;line-height:1.6}.hm-newsletter{padding:55px 0;background:linear-gradient(110deg,#332719,#19140e 60%,#2c2115);border-block:1px solid #c9a66d66}.hm-newsletter-inner{display:flex;align-items:center;justify-content:space-between;gap:35px}.hm-newsletter h2{font-size:36px}.hm-newsletter p{max-width:470px;color:#c7b9a2;font-size:11px;line-height:1.8}.hm-newsletter form{display:flex;min-width:min(440px,48%)}.hm-newsletter form input{flex:1}.hm-newsletter form button{display:flex;align-items:center;gap:9px;border:1px solid #efd8a9;padding:0 17px;background:#d4b477;color:#171109;font-size:9px;letter-spacing:.12em;text-transform:uppercase}.hm-footer{padding:55px 0 22px;background:#090807;border-top:1px solid #c9a66d55}.hm-footer-main{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:35px;padding-bottom:40px}.hm-footer-brand{display:flex;flex-direction:column;align-items:flex-start}.hm-footer-brand .hm-crest{margin-bottom:7px}.hm-footer-brand>strong{font-size:27px}.hm-footer-brand p,.hm-footer-main p,.hm-footer-main a{color:#aa9e8b;font-size:10px;line-height:1.9}.hm-footer-main h4{margin:8px 0 16px;color:#d5b77f;font:400 18px 'Cormorant Garamond',serif}.hm-footer-main a,.hm-footer-main button{display:block;margin:9px 0;color:#b9ad99;font-size:10px;text-align:left}.hm-footer-main button{border:0;background:transparent;padding:0}.hm-footer-main a:hover,.hm-footer-main button:hover{color:#f1d8a6}.hm-footer-bottom{display:flex;justify-content:space-between;gap:15px;border-top:1px solid #ffffff18;padding-top:18px;color:#857a69;font-size:9px;letter-spacing:.08em}.hm-overlay{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:18px;background:#000d;backdrop-filter:blur(7px)}.hm-modal{position:relative;width:min(560px,100%);max-height:92vh;overflow:auto;padding:32px;border:1px solid #d5b77f;background:radial-gradient(ellipse at 50% 0%,#3b2d1b,#19140e 60%);box-shadow:0 25px 90px #000c}.hm-close{position:absolute;top:13px;right:13px;width:34px;height:34px;display:grid;place-items:center;border:1px solid #c9a66d66;background:transparent;color:#e7d2a8}.hm-modal-crest{width:47px;height:47px;position:relative;display:grid;place-items:center;margin-bottom:20px;border:1px solid #c9a66d77;border-radius:50%;color:#e8d1a4}.hm-modal-crest b{position:absolute;top:17px;font:italic 18px Georgia,serif}.hm-modal h2{margin:9px 35px 18px 0;color:#f6e8cf;font:400 34px 'Cormorant Garamond',serif}.hm-modal p{color:#c6b9a3;font-size:11px;line-height:1.8}.hm-detail-image{height:180px;display:grid;place-items:center;margin:15px 0;border:1px solid #c9a66d55;background:radial-gradient(ellipse,#4b3923,#19140e)}.hm-detail-image span{font:italic 90px 'Cormorant Garamond',serif;color:#d1b47b}.hm-detail-image img{height:100%;max-width:100%;object-fit:contain}.hm-field-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}.hm-field-grid label{display:flex;flex-direction:column;gap:8px;color:#d7bd8d;font-size:9px;letter-spacing:.1em;text-transform:uppercase}.hm-field-grid strong{font:500 17px 'Cormorant Garamond',serif;color:#f0dfb9}.hm-field-grid select{height:40px;min-width:0;border:1px solid #c9a66d66;padding:0 8px;background:#100e0b;color:#f2e6d2;font-size:10px}.hm-wide{width:100%;margin-top:10px}.hm-quantity{display:flex;align-items:center;justify-content:space-between;margin:22px 0;color:#d7bd8d;font-size:10px;letter-spacing:.12em;text-transform:uppercase}.hm-quantity span,.hm-cart-qty{display:flex;align-items:center;gap:15px}.hm-quantity button,.hm-cart-qty button{width:29px;height:29px;display:grid;place-items:center;border:1px solid #c9a66d77;background:transparent;color:#ead7b2}.hm-modal-total{display:flex;justify-content:space-between;border-top:1px solid #c9a66d66;padding:17px 0;color:#d6c4a4;font-size:11px}.hm-modal-total b{color:#f1d8a6;font:500 19px 'Cormorant Garamond',serif}.hm-payment-visual{display:flex;flex-direction:column;gap:20px;margin:18px 0;padding:24px;border:1px solid #e2c58f;border-radius:9px;background:linear-gradient(135deg,#71562e,#1d1811 68%,#0b0907);color:#f4e3bd}.hm-payment-visual span{font:400 18px 'Cormorant Garamond',serif;letter-spacing:.1em}.hm-payment-visual small{font-size:8px;letter-spacing:.2em}.hm-demo-note{padding:12px;border:1px solid #c9a66d44;background:#ffffff05}.hm-cart-line{display:flex;justify-content:space-between;gap:15px;padding:14px 0;border-bottom:1px solid #ffffff1c;color:#e5d7c1;font-size:11px}.hm-cart-line>div{display:flex;flex-direction:column;gap:7px}.hm-cart-line small{color:#a99b85;font-size:9px}.hm-cart-line>strong{color:#ecd5a6;font:500 17px 'Cormorant Garamond',serif}.hm-cart-qty{gap:9px;color:#e8d6b6;font-size:10px}.hm-cart-qty button{width:23px;height:23px}.hm-legal-copy{max-height:52vh;overflow:auto;padding-right:8px}.hm-legal-copy p{padding:5px 0;border-bottom:1px solid #ffffff12;color:#d8cbb5}.hm-legal-copy p:first-child{font-weight:700;color:#f0d7a5}@media(max-width:1050px){.hm-category-grid{grid-template-columns:repeat(4,1fr)}.hm-product-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.hm-hero-stamp{right:7%;width:150px;height:150px}.hm-hero-stamp>b{font-size:62px}}@media(max-width:700px){.hm-language-bar{padding:0 12px;font-size:6px;letter-spacing:.08em}.hm-language-bar>span:last-child{display:none}.hm-header{height:82px;padding:0 16px;grid-template-columns:1fr auto}.hm-header nav{display:none}.hm-brand strong{font-size:24px}.hm-hero{min-height:540px;align-items:end}.hm-hero-image{object-position:58% center}.hm-hero-shade{background:linear-gradient(0deg,#100e0bf5 0%,#100e0bc7 42%,#100e0b22 100%)}.hm-hero-copy{width:90%;margin:0 auto;padding:240px 0 40px}.hm-hero h1{font-size:48px;max-width:450px}.hm-hero-copy p{font-size:11px}.hm-hero-stamp{top:45px;right:8%;transform:none;width:105px;height:105px;outline-offset:5px}.hm-hero-stamp>b{font-size:43px}.hm-hero-stamp>span{font-size:7px}.hm-stamp-crown{margin:0}.hm-stamp-crown svg{width:17px}.hm-hero-stamp small{font-size:5px;margin-top:4px}.hm-wrap{width:92%}.hm-collections{padding:53px 0}.hm-section-head{align-items:stretch;flex-direction:column}.hm-search{width:100%}.hm-category-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:38px}.hm-category-grid button{min-height:93px;gap:8px}.hm-category-grid button b{font-size:7px;letter-spacing:.05em}.hm-category-grid button>span{width:36px;height:36px}.hm-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.hm-product-info>span{font-size:12px}.hm-product-heading h3{font-size:25px}.hm-carriers{grid-template-columns:repeat(3,1fr);gap:8px}.hm-carrier{min-height:57px;font-size:17px}.hm-tracking{grid-template-columns:1fr;gap:18px;padding-block:45px}.hm-track-form{grid-template-columns:1fr}.hm-track-form .hm-gold-button{width:100%}.hm-newsletter-inner{align-items:stretch;flex-direction:column;gap:15px}.hm-newsletter form{min-width:0;width:100%}.hm-newsletter form input{width:50%}.hm-footer-main{grid-template-columns:repeat(2,1fr);gap:25px}.hm-footer-bottom{flex-direction:column;font-size:8px}.hm-modal{padding:25px 20px}.hm-field-grid{grid-template-columns:1fr}.hm-field-grid label{display:grid;grid-template-columns:80px 1fr;align-items:center}.hm-field-grid strong{font-size:15px}}@media(max-width:390px){.hm-category-grid button b{font-size:6px}.hm-hero h1{font-size:41px}.hm-footer-main{grid-template-columns:1fr 1fr;gap:16px}.hm-newsletter form{flex-direction:column;gap:8px}.hm-newsletter form input,.hm-newsletter form button{width:100%;min-height:46px;justify-content:center}}
+/* Helpmey v2: unified rectangular utility navigation */
+.hm-language-bar{height:30px}
+.hm-header{height:96px;grid-template-columns:auto 1fr auto;gap:28px;padding:0 clamp(18px,4vw,64px);border:1px solid #c9a66d88;border-left:0;border-right:0;box-shadow:0 8px 28px #0005}
+.hm-header nav{justify-self:center}
+.hm-head-actions{display:flex;align-items:center;justify-self:end;gap:9px}
+.hm-head-actions>button,.hm-head-actions>.hm-nav-icon,.hm-nav-language{height:43px;min-width:43px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 11px;border:1px solid #c9a66d88;background:#17130e;color:#ecd9b6}
+.hm-head-actions>.hm-nav-icon{text-decoration:none}
+.hm-nav-language{position:relative;cursor:pointer}
+.hm-nav-language select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.hm-nav-language option{background:#17130e;color:#f4ead9}
+.hm-head-actions .hm-account-button{display:flex;gap:8px;min-width:0;padding:0 14px;background:linear-gradient(135deg,#e7d1a5,#b58b50);border-color:#eed6a5;color:#181109;font-size:9px;font-weight:700;letter-spacing:.09em;white-space:nowrap}
+.hm-head-actions .hm-account-button:hover{filter:brightness(1.08)}
+.hm-head-actions>button:first-of-type{width:43px;padding:0}
+.hm-hero{height:calc(100vh - 126px);height:calc(100svh - 126px);min-height:500px;max-height:1000px;isolation:isolate;align-items:center}
+.hm-hero-backdrop{position:absolute;z-index:-2;inset:-2%;width:104%;height:104%;object-fit:cover;object-position:center 48%;filter:blur(17px) brightness(.52) saturate(.85);transform:scale(1.025)}
+.hm-hero-image{z-index:-1;inset:0;width:100%;height:100%;object-fit:contain;object-position:center center;filter:brightness(.96) contrast(1.02);padding:0}
+.hm-hero-shade{z-index:0;background:linear-gradient(90deg,#100e0bc9 0%,#100e0b9c 25%,#100e0b42 48%,#100e0b08 76%),linear-gradient(0deg,#100e0b68,transparent 28%,#100e0b18)}
+.hm-hero-copy{z-index:2;width:min(590px,44%);margin-left:7vw;padding:40px 0;text-shadow:0 2px 18px #000b}
+.hm-hero-stamp{z-index:2}
+.hm-account-form{display:flex;flex-direction:column;gap:14px;margin-top:20px}
+.hm-account-form label{display:flex;flex-direction:column;gap:7px;color:#d7bd8d;font-size:9px;letter-spacing:.12em;text-transform:uppercase}
+.hm-account-form input{height:43px;border:1px solid #c9a66d66;padding:0 12px;background:#100e0b;color:#f2e6d2;font-size:11px;text-transform:none;letter-spacing:normal}
+.hm-account-form .hm-demo-note{margin:0}
+@media(max-width:1050px){.hm-header{gap:15px;padding-inline:20px}.hm-header nav{gap:15px}.hm-header nav a{font-size:8px}.hm-head-actions{gap:6px}.hm-head-actions .hm-account-button{padding-inline:10px;font-size:8px}.hm-hero-copy{width:48%;margin-left:5vw}.hm-hero-stamp{right:5%}}
+@media(max-width:700px){
+ .hm-language-bar{height:26px;padding-inline:12px}
+ .hm-header{height:82px;grid-template-columns:auto 1fr;gap:8px;padding-inline:12px}
+ .hm-header nav{display:none}
+ .hm-head-actions{gap:5px}
+ .hm-head-actions>button,.hm-head-actions>.hm-nav-icon,.hm-nav-language{height:39px;min-width:37px;padding:0 8px}
+ .hm-head-actions>button:first-of-type{width:38px}
+ .hm-head-actions .hm-account-button{padding:0 9px;font-size:7px;letter-spacing:0;gap:5px}
+ .hm-head-actions .hm-account-button svg{width:13px}
+ .hm-hero{height:calc(100vh - 108px);height:calc(100svh - 108px);min-height:490px;max-height:900px;align-items:end}
+ .hm-hero-backdrop{filter:blur(13px) brightness(.48);object-position:58% center}
+ .hm-hero-image{object-fit:contain;object-position:center center}
+ .hm-hero-shade{background:linear-gradient(0deg,#100e0bdc 0%,#100e0b8a 38%,#100e0b08 72%),linear-gradient(90deg,#100e0b28,transparent 75%)}
+ .hm-hero-copy{width:90%;margin:0 auto;padding:0 0 30px}
+ .hm-hero h1{font-size:clamp(38px,8vw,52px);max-width:480px}
+ .hm-hero-copy p{max-width:390px}
+ .hm-hero-stamp{top:20px;right:8%;width:86px;height:86px;transform:none;outline-offset:4px}
+ .hm-hero-stamp>b{font-size:35px}
+ .hm-hero-stamp>span{font-size:6px}
+ .hm-stamp-crown{margin:0}
+ .hm-stamp-crown svg{width:14px}
+ .hm-hero-stamp small{font-size:5px;margin-top:3px}
+}
+@media(max-width:390px){.hm-head-actions{gap:4px}.hm-head-actions .hm-account-button{padding-inline:6px;font-size:6px}.hm-head-actions>.hm-nav-icon,.hm-nav-language{min-width:32px;padding-inline:6px}.hm-hero{min-height:470px}}
+@media(max-height:650px) and (min-width:701px){.hm-hero{min-height:420px}.hm-hero-copy{padding:20px 0}.hm-hero h1{font-size:clamp(40px,5vw,64px)}.hm-hero-stamp{width:135px;height:135px}}
+
+/* Helpmey premium payment selection */
+.hm-payment-total{display:flex;align-items:center;justify-content:space-between;margin:6px 0 10px;padding:15px 17px;border:1px solid #c9a66d77;background:linear-gradient(100deg,#382a19,#19140e);color:#d7c4a3;font-size:10px;letter-spacing:.13em;text-transform:uppercase}
+.hm-payment-total strong{color:#f1d8a6;font:500 25px 'Cormorant Garamond',Georgia,serif;letter-spacing:0}
+.hm-payment-intro{margin:12px 0 16px!important}
+.hm-payment-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:16px 0}
+.hm-pay-option{min-width:0;min-height:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:12px 5px;border:1px solid #c9a66d55;background:linear-gradient(145deg,#211b13,#100e0b);color:#f1e5d0;transition:transform .2s,border-color .2s,box-shadow .2s,background .2s}
+.hm-pay-option:hover{transform:translateY(-3px);border-color:#e4c58d;box-shadow:0 8px 24px #d4b47722}
+.hm-pay-option.active{border-color:#f0d29b;background:linear-gradient(145deg,#4a3821,#21170d);box-shadow:0 0 0 1px #d9b77b55,0 0 25px #d4b4772b}
+.hm-pay-option>strong{font-size:10px;letter-spacing:.04em}
+.hm-pay-option>small{font-size:8px;color:#b7a88f}
+.hm-brand-mastercard{position:relative;width:49px;height:29px;display:block}
+.hm-brand-mastercard i,.hm-brand-mastercard b{position:absolute;top:2px;width:27px;height:27px;border-radius:50%;display:block}
+.hm-brand-mastercard i{left:3px;background:#eb001b}
+.hm-brand-mastercard b{right:3px;background:#f79e1b;mix-blend-mode:screen;opacity:.95}
+.hm-brand-visa{height:29px;display:flex;align-items:center;color:#fff;font:italic 900 25px Arial,sans-serif;letter-spacing:-.08em}
+.hm-brand-paypal{width:30px;height:30px;display:grid;place-items:center;color:#fff;font:bold italic 27px Arial,sans-serif;filter:drop-shadow(2px 1px 0 #009cde)}
+.hm-brand-paypal b{font-style:italic}
+.hm-brand-stripe{height:29px;display:flex;align-items:center;color:#fff;font:800 24px Arial,sans-serif;letter-spacing:-.08em}
+.hm-payment-entry{margin-top:18px;padding:17px;border:1px solid #d4b47788;background:linear-gradient(145deg,#251d13,#110e0a);animation:hm-pay-in .25s ease-out}
+@keyframes hm-pay-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.hm-payment-entry-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}
+.hm-payment-entry-head h3{margin:4px 0 0;color:#f3e3c5;font:400 25px 'Cormorant Garamond',Georgia,serif}
+.hm-payment-clear{width:31px;height:31px;display:grid;place-items:center;border:1px solid #c9a66d66;background:transparent;color:#e9d5ad}
+.hm-card-fields{display:flex;flex-direction:column;gap:12px}
+.hm-card-fields>div{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hm-card-fields label{display:flex;flex-direction:column;gap:6px;color:#d7bd8d;font-size:8px;letter-spacing:.12em;text-transform:uppercase}
+.hm-card-fields input{width:100%;height:42px;min-width:0;padding:0 11px;border:1px solid #c9a66d66;background:#0e0c09;color:#f4ead9;font-size:11px;letter-spacing:.04em}
+.hm-card-fields input:focus{outline:1px solid #e3c38b;border-color:#e3c38b}
+.hm-paypal-continue{width:100%;min-height:48px;display:flex;align-items:center;justify-content:center;gap:11px;margin:14px 0;padding:8px;border:1px solid #4b9bd1;background:#0878bd;color:white;font-size:11px;font-weight:700}
+.hm-paypal-continue .hm-brand-paypal{width:24px;height:24px;font-size:22px}
+.hm-stripe-preview{display:flex;align-items:center;gap:10px;min-height:48px;margin:13px 0;padding:12px;border:1px dashed #bda47788;background:#ffffff05;color:#e1d1b3;font-size:10px}
+.hm-security-row{display:flex;justify-content:center;flex-wrap:wrap;gap:15px;margin:17px 0 8px;padding-top:13px;border-top:1px solid #c9a66d44}
+.hm-security-row span{display:flex;align-items:center;gap:6px;color:#d6c094;font-size:7px;font-weight:700;letter-spacing:.1em}
+.hm-security-row svg{color:#b8a06e}
+.hm-payment-entry .hm-demo-note{font-size:8px;line-height:1.7}
+.hm-payment-notice{padding:11px;border:1px solid #c9a66d77;background:#ffffff08;color:#eed6a5!important}
+@media(max-width:700px){.hm-payment-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hm-pay-option{min-height:100px}.hm-payment-entry{padding:13px}.hm-security-row{gap:9px}}
+
+/* Full-viewport Helpmey hero and resilient navigation */
+.hm-header{width:100%;max-width:100vw;min-width:0;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);overflow:visible}
+.hm-header nav{min-width:0;white-space:nowrap}
+.hm-head-actions{min-width:0;max-width:100%;gap:8px}
+.hm-head-actions>*{flex-shrink:0}
+.hm-hero{
+ width:100vw;
+ height:100vh;
+ min-height:100vh;
+ max-height:none;
+ margin-inline:calc(50% - 50vw);
+ position:relative;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ overflow:hidden;
+ isolation:isolate;
+ background-color:#100e0b;
+ background-position:center center;
+ background-repeat:no-repeat;
+ background-size:cover;
+}
+.hm-hero-backdrop{
+ position:absolute;
+ z-index:-2;
+ inset:0;
+ width:100%;
+ height:100%;
+ object-fit:cover;
+ object-position:center center;
+ filter:blur(16px) brightness(.48) saturate(.82);
+ transform:scale(1.04);
+}
+.hm-hero-image{
+ position:absolute;
+ z-index:-1;
+ inset:0;
+ width:100%;
+ height:100%;
+ object-fit:contain;
+ object-position:center center;
+ background-position:center center;
+ background-repeat:no-repeat;
+ background-size:contain;
+ padding:0;
+}
+.hm-hero-shade{
+ z-index:0;
+ background:linear-gradient(90deg,#100e0b9c 0%,#100e0b70 48%,#100e0b4a 100%),linear-gradient(0deg,#100e0b72,transparent 48%,#100e0b38);
+}
+.hm-hero-copy{
+ z-index:2;
+ width:min(700px,82vw);
+ margin:0;
+ padding:40px 24px;
+ text-align:center;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+}
+.hm-hero-copy .hm-overline{justify-content:center}
+.hm-hero-copy p{margin-left:auto;margin-right:auto}
+.hm-hero-copy .hm-gold-button{align-self:center}
+.hm-hero-stamp{z-index:2}
+@media(max-width:1050px){
+ .hm-header{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:12px;padding-inline:18px}
+ .hm-head-actions{gap:5px}
+}
+@media(max-width:700px){
+ .hm-header{grid-template-columns:minmax(0,1fr) auto;overflow:hidden}
+ .hm-head-actions{gap:4px;max-width:100%;overflow:visible}
+ .hm-hero{width:100vw;height:100vh;min-height:100vh;margin-inline:calc(50% - 50vw)}
+ .hm-hero-copy{width:min(92vw,600px);padding:32px 14px}
+ .hm-hero-image{object-fit:contain;object-position:center center}
+ .hm-hero-shade{background:linear-gradient(0deg,#100e0bbd 0%,#100e0b45 55%,#100e0b35 100%)}
+ .hm-hero-stamp{top:24px;right:8%;width:86px;height:86px}
+ .hm-hero h1{font-size:clamp(38px,8vw,56px)}
+}
+
+/* Helpmey viewport composition and visible account control */
+.hm-store{overflow-x:clip}
+.hm-header{
+ width:100%;
+ max-width:100%;
+ min-width:0;
+ grid-template-columns:minmax(150px,1fr) auto minmax(0,1fr);
+ gap:clamp(10px,1.5vw,24px);
+ padding-inline:clamp(14px,3vw,42px);
+}
+.hm-header nav{min-width:0;justify-content:center;gap:clamp(12px,2vw,30px)}
+.hm-head-actions{
+ display:flex;
+ align-items:center;
+ justify-self:end;
+ justify-content:flex-end;
+ min-width:0;
+ max-width:100%;
+ gap:clamp(5px,.7vw,10px);
+}
+.hm-head-actions .hm-nav-language{
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ gap:5px;
+ flex:0 0 auto;
+ min-width:64px;
+ height:46px;
+ padding:0 8px;
+ border:1px solid #c9a66d88;
+ color:var(--hm-light);
+}
+.hm-head-actions .hm-nav-language select{width:42px;min-width:0;padding:0;color:var(--hm-light);background:transparent;border:0;font-size:9px}
+.hm-head-actions>.hm-account-button{
+ display:flex!important;
+ flex:0 0 auto;
+ align-items:center;
+ justify-content:center;
+ gap:7px;
+ width:auto!important;
+ min-width:138px;
+ height:46px;
+ padding:0 11px!important;
+ white-space:nowrap;
+ border:1px solid #c9a66d88;
+ background:linear-gradient(135deg,#eed7a5,#b58b50)!important;
+ color:#19130b!important;
+ font-size:9px!important;
+ letter-spacing:.02em;
+}
+.hm-head-actions>.hm-account-button svg{flex:0 0 auto;display:block}
+.hm-head-actions>.hm-nav-icon,
+.hm-head-actions>button:not(.hm-account-button){flex:0 0 46px}
+.hm-hero{
+ width:100%;
+ height:calc(100vh - 139px);
+ min-height:calc(100svh - 139px);
+ max-height:none;
+ display:flex;
+ align-items:center;
+ justify-content:flex-start;
+ overflow:hidden;
+ isolation:isolate;
+ background-color:#100e0b;
+ background-position:center center;
+ background-repeat:no-repeat;
+ background-size:cover;
+}
+.hm-hero-backdrop{
+ position:absolute;
+ z-index:-2;
+ inset:0;
+ width:100%;
+ height:100%;
+ object-fit:cover;
+ object-position:center center;
+ filter:blur(17px) brightness(.42) saturate(.82);
+ transform:scale(1.05);
+}
+.hm-hero-image{
+ position:absolute;
+ z-index:-1;
+ inset:0;
+ width:100%;
+ height:100%;
+ object-fit:contain;
+ object-position:center center;
+ background-position:center center;
+ background-repeat:no-repeat;
+ background-size:contain;
+}
+.hm-hero-shade{
+ z-index:0;
+ background:linear-gradient(90deg,#100e0bd9 0%,#100e0b9c 24%,#100e0b45 48%,#100e0b12 78%,#100e0b38 100%),linear-gradient(0deg,#100e0b58,transparent 38%,#100e0b25);
+}
+.hm-hero-copy{
+ z-index:2;
+ width:min(550px,43vw);
+ margin-left:clamp(26px,7vw,110px);
+ padding:35px 0;
+}
+.hm-hero-stamp{z-index:2;right:clamp(34px,7vw,110px);width:clamp(110px,13vw,170px);height:clamp(110px,13vw,170px)}
+@media(max-width:1100px){
+ .hm-header{grid-template-columns:auto minmax(0,1fr);gap:12px}
+ .hm-header nav{display:none}
+ .hm-head-actions{gap:6px}
+ .hm-hero-copy{width:min(540px,55vw);margin-left:5vw}
+}
+@media(max-width:700px){
+ .hm-language-bar{padding-inline:14px;font-size:6px;letter-spacing:.1em}
+ .hm-header{height:86px;grid-template-columns:minmax(95px,1fr) auto;gap:8px;padding-inline:10px;overflow:visible}
+ .hm-brand strong{font-size:26px}
+ .hm-head-actions{gap:5px;overflow:visible}
+ .hm-head-actions .hm-nav-language{height:40px;min-width:45px;padding:0 5px;gap:3px}
+ .hm-head-actions .hm-nav-language select{width:30px;font-size:8px}
+ .hm-head-actions>.hm-account-button{width:40px!important;min-width:40px;height:40px;padding:0!important}
+ .hm-head-actions>.hm-account-button span{display:none}
+ .hm-head-actions>.hm-nav-icon,.hm-head-actions>button:not(.hm-account-button){flex-basis:40px;width:40px;height:40px}
+ .hm-hero{height:calc(100svh - 120px);min-height:420px;width:100%;max-width:100%;margin:0}
+ .hm-hero-image{object-fit:contain;object-position:center center}
+ .hm-hero-shade{background:linear-gradient(0deg,#100e0bbd 0%,#100e0b55 55%,#100e0b35 100%)}
+ .hm-hero-copy{width:min(88vw,520px);margin:0 auto;padding:28px 8px;text-align:center;align-items:center}
+ .hm-hero-copy .hm-overline{justify-content:center}
+ .hm-hero-copy p{margin-inline:auto}
+ .hm-hero-stamp{right:7%;top:12%;width:76px;height:76px;transform:none}
+ .hm-hero-stamp>b{font-size:34px}
+ .hm-hero-stamp>span{font-size:6px}
+ .hm-hero-stamp small{font-size:5px}
+ .hm-hero h1{font-size:clamp(36px,9vw,54px)}
+}
+@media(max-width:390px){
+ .hm-head-actions{gap:3px}
+ .hm-head-actions .hm-nav-language{min-width:40px}
+ .hm-head-actions>.hm-nav-icon,.hm-head-actions>button:not(.hm-account-button){flex-basis:36px;width:36px;height:36px}
+ .hm-head-actions>.hm-account-button{flex-basis:36px;width:36px!important;min-width:36px;height:36px}
+}
+
+/* Ensure the palace hero reaches both viewport edges */
+.hm-hero{
+ width:100vw;
+ margin-inline:calc(50% - 50vw);
+ height:calc(100vh - 139px);
+ min-height:calc(100svh - 139px);
+ background-size:cover;
+ background-position:center center;
+ background-repeat:no-repeat;
+}
+@media(max-width:700px){
+ .hm-hero{width:100vw;margin-inline:calc(50% - 50vw);height:calc(100svh - 120px);min-height:420px}
+}
+
+/* Final production header + true first-screen hero composition */
+.hm-store{position:relative;overflow-x:clip}
+.hm-language-bar{
+ position:absolute;
+ z-index:30;
+ top:0;
+ left:0;
+ right:0;
+ width:100%;
+ height:34px;
+}
+.hm-header{
+ position:absolute;
+ z-index:30;
+ top:34px;
+ left:0;
+ right:0;
+ width:100%;
+ height:105px;
+ display:grid;
+ grid-template-columns:minmax(160px,1fr) auto minmax(360px,1fr);
+ align-items:center;
+ gap:clamp(12px,1.5vw,24px);
+ padding-inline:clamp(18px,4vw,56px);
+ background:linear-gradient(180deg,rgba(18,14,10,.94),rgba(14,11,8,.88));
+ backdrop-filter:blur(8px);
+}
+.hm-header nav{min-width:0;display:flex;justify-content:center;gap:clamp(14px,2.4vw,34px)}
+.hm-head-actions{
+ display:flex!important;
+ flex-direction:row!important;
+ align-items:center;
+ justify-self:end;
+ justify-content:flex-end;
+ gap:8px;
+ min-width:0;
+ width:auto;
+ max-width:100%;
+ overflow:visible;
+}
+.hm-head-actions .hm-nav-language{
+ display:flex!important;
+ flex:0 0 62px;
+ align-items:center;
+ justify-content:center;
+ gap:4px;
+ width:62px;
+ min-width:62px;
+ height:46px;
+ padding:0 5px;
+ border:1px solid #c9a66d88;
+ color:#f0dfb9;
+ background:#100e0b;
+}
+.hm-head-actions .hm-nav-language select{
+ display:block!important;
+ width:29px;
+ min-width:29px;
+ max-width:29px;
+ padding:0;
+ border:0;
+ outline:0;
+ background:#100e0b;
+ color:#f0dfb9;
+ font-size:9px;
+}
+.hm-head-actions>.hm-account-button{
+ position:relative;
+ display:flex!important;
+ flex:0 0 148px;
+ align-items:center;
+ justify-content:center;
+ gap:7px;
+ width:148px!important;
+ min-width:148px;
+ height:46px;
+ padding:0 10px!important;
+ border:1px solid #e2c28c!important;
+ background:linear-gradient(135deg,#f0dfb9,#bd965c)!important;
+ color:#171109!important;
+ white-space:nowrap;
+ overflow:visible;
+ font-size:10px!important;
+ font-weight:700;
+ letter-spacing:.015em;
+}
+.hm-head-actions>.hm-account-button svg{display:block!important;flex:0 0 17px;color:#171109!important}
+.hm-head-actions>.hm-account-button span{display:inline!important;visibility:visible;opacity:1;color:#171109!important}
+.hm-head-actions>.hm-nav-icon,
+.hm-head-actions>button:not(.hm-account-button){
+ position:relative;
+ display:grid;
+ flex:0 0 46px;
+ width:46px;
+ min-width:46px;
+ height:46px;
+ place-items:center;
+ border:1px solid #c9a66d88;
+ background:#100e0b;
+ color:#f0dfb9;
+}
+.hm-hero{
+ position:relative;
+ width:100%;
+ height:100vh;
+ height:100svh;
+ min-height:560px;
+ max-height:none;
+ margin:0;
+ padding:139px 0 0;
+ display:flex;
+ align-items:center;
+ justify-content:flex-start;
+ overflow:hidden;
+ isolation:isolate;
+ background:#100e0b;
+ background-position:center center;
+ background-repeat:no-repeat;
+ background-size:cover;
+}
+.hm-hero-backdrop{
+ position:absolute;
+ z-index:-2;
+ inset:0;
+ width:100%;
+ height:100%;
+ object-fit:cover;
+ object-position:center center;
+ filter:blur(18px) brightness(.45) saturate(.82);
+ transform:scale(1.06);
+}
+.hm-hero-image{
+ position:absolute;
+ z-index:-1;
+ inset:0;
+ width:100%;
+ height:100%;
+ object-fit:contain;
+ object-position:center center;
+ background:#100e0b;
+}
+.hm-hero-shade{
+ position:absolute;
+ z-index:0;
+ inset:0;
+ pointer-events:none;
+ background:linear-gradient(90deg,rgba(16,14,11,.78) 0%,rgba(16,14,11,.52) 28%,rgba(16,14,11,.10) 58%,rgba(16,14,11,.12) 100%),linear-gradient(0deg,rgba(16,14,11,.48),transparent 38%,rgba(16,14,11,.34));
+}
+.hm-hero-copy{
+ position:relative;
+ z-index:2;
+ width:min(550px,43vw);
+ margin-left:clamp(28px,7vw,110px);
+ padding:30px 0;
+ text-align:left;
+ align-items:flex-start;
+}
+.hm-hero-copy .hm-overline{justify-content:flex-start}
+.hm-hero-copy p{margin-left:0;margin-right:0}
+.hm-hero-copy .hm-gold-button{align-self:flex-start}
+.hm-hero-stamp{z-index:2;right:clamp(34px,7vw,110px)}
+@media(max-width:1100px){
+ .hm-header{grid-template-columns:minmax(130px,1fr) minmax(330px,auto);gap:10px;padding-inline:16px}
+ .hm-header nav{display:none}
+ .hm-head-actions{gap:6px}
+ .hm-hero-copy{width:min(540px,55vw);margin-left:5vw}
+}
+@media(max-width:700px){
+ .hm-language-bar{height:30px;padding-inline:12px;font-size:6px;letter-spacing:.09em}
+ .hm-header{
+  top:30px;
+  height:86px;
+  grid-template-columns:minmax(95px,1fr) auto;
+  gap:5px;
+  padding-inline:9px;
+ }
+ .hm-brand strong{font-size:26px}
+ .hm-head-actions{gap:4px}
+ .hm-head-actions .hm-nav-language{flex-basis:42px;width:42px;min-width:42px;height:40px;gap:2px;padding:0 3px}
+ .hm-head-actions .hm-nav-language select{width:22px;min-width:22px;max-width:22px;font-size:8px}
+ .hm-head-actions>.hm-account-button{
+  flex:0 0 40px;
+  width:40px!important;
+  min-width:40px;
+  height:40px;
+  padding:0!important;
+ }
+ .hm-head-actions>.hm-account-button span{display:none!important}
+ .hm-head-actions>.hm-account-button svg{width:18px;height:18px}
+ .hm-head-actions>.hm-nav-icon,
+ .hm-head-actions>button:not(.hm-account-button){flex-basis:40px;width:40px;min-width:40px;height:40px}
+ .hm-hero{height:100vh;height:100svh;min-height:520px;padding-top:116px}
+ .hm-hero-image{object-fit:contain;object-position:center center}
+ .hm-hero-shade{background:linear-gradient(0deg,rgba(16,14,11,.78),rgba(16,14,11,.24) 58%,rgba(16,14,11,.5))}
+ .hm-hero-copy{width:min(88vw,520px);margin:0 auto;padding:25px 8px;text-align:center;align-items:center}
+ .hm-hero-copy .hm-overline{justify-content:center}
+ .hm-hero-copy p{margin-inline:auto}
+ .hm-hero-copy .hm-gold-button{align-self:center}
+ .hm-hero-stamp{right:6%;top:20%;width:70px;height:70px;transform:none}
+ .hm-hero-stamp>b{font-size:32px}
+ .hm-hero-stamp>span,.hm-hero-stamp small{font-size:5px}
+ .hm-hero h1{font-size:clamp(34px,9vw,52px)}
+}
+@media(max-width:390px){
+ .hm-header{padding-inline:6px}
+ .hm-head-actions{gap:3px}
+ .hm-head-actions .hm-nav-language{flex-basis:38px;width:38px;min-width:38px}
+ .hm-head-actions .hm-nav-language select{width:19px;min-width:19px;max-width:19px}
+ .hm-head-actions>.hm-account-button{flex-basis:36px;width:36px!important;min-width:36px;height:36px}
+ .hm-head-actions>.hm-nav-icon,.hm-head-actions>button:not(.hm-account-button){flex-basis:36px;width:36px;min-width:36px;height:36px}
+}
+
+.hm-build-meta{display:block;margin-top:8px;color:#b49a70;font-size:9px;letter-spacing:.12em;text-align:center}
