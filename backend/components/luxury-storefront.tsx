@@ -111,7 +111,9 @@ export default function LuxuryStorefront() {
       watches:["watch","uhr"], "womens-bags":["bag","tasche","handbag"], sportswear:["sport","sportswear","leggings"]
     };
     const terms = departmentWords[department] || [department];
-    const matched = inventory.filter(p => terms.some(term => (p.category || "").toLowerCase().includes(term)));
+    // Imported products carry a department id as category; only free-text categories are matched by words.
+    const ids = new Set(departments.map(d => d.id));
+    const matched = inventory.filter(p => ids.has(p.category) ? p.category === department : terms.some(term => (p.category || "").toLowerCase().includes(term)));
     return matched.slice(0,20);
   }, [inventory, department]);
   const cartCount = cart.reduce((n,line) => n + line.quantity, 0);
