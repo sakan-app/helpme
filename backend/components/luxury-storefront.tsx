@@ -36,6 +36,19 @@ const words = {
   AR: { tagline:"فن التميز", headline:"أناقة خالدة. مجموعة استثنائية.", intro:"اكتشف عالماً منتقى من التصميم والأناقة وأسلوب الحياة العصري.", explore:"اكتشف المجموعة", all:"جميع الأقسام", search:"ابحث في المجموعة …", size:"المقاس / الطراز", color:"اللون", price:"السعر", quantity:"الكمية", continue:"متابعة", add:"أضف إلى السلة", back:"رجوع", summary:"اختياراتك", count:"العدد", type:"القسم", confirm:"تأكيد الاختيار", checkout:"الدفع الآمن", cart:"سلة التسوق", empty:"سلتك فارغة حالياً.", subtotal:"المجموع الفرعي", payment:"الدفع", secure:"تجربة دفع آمنة", cardholder:"حامل البطاقة", cardnumber:"رقم البطاقة", expiry:"تاريخ الانتهاء", cvv:"رمز الأمان", pay:"متابعة الدفع", demo:"لم يتم ربط مزود الدفع بعد. لن تتم معالجة بيانات البطاقة.", placeholder:"صورة المنتج قريباً", select:"اختر", language:"اللغة", inventory:"من مجموعتنا", unavailable:"سيظهر السعر والخيارات بعد ربط المخزون.", account:"الحساب", login:"تسجيل الدخول", signup:"إنشاء حساب", email:"البريد الإلكتروني", password:"كلمة المرور", logout:"تسجيل الخروج", signedIn:"تم تسجيل الدخول باسم", wait:"يرجى الانتظار …", passwordRule:"12 حرفاً على الأقل مع أحرف كبيرة وصغيرة ورقم.", failed:"تعذر إكمال الطلب.", noResults:"لا توجد منتجات مطابقة في هذا القسم." }
 } satisfies Record<Locale, Record<string,string>>;
 
+const departmentWords: Record<string,string[]> = {
+  sneakers:["sneaker","shoe","shoes","schuh"], smartphones:["smartphone","phone","telefon"], computers:["computer","laptop","notebook"],
+  bluetooth:["bluetooth","audio","headphone","kopfhörer"], "womens-clothing":["damen","women","clothing","bekleidung"],
+  innerwear:["underwear","innerwear","wäsche","unterwäsche"], eveningwear:["evening","abend","dress","kleid"],
+  "mens-suits":["suit","anzug","menswear","herren"], perfumes:["perfume","parfum","parfüm","fragrance","duft"],
+  watches:["watch","uhr"], "womens-bags":["bag","tasche","handbag"], sportswear:["sport","sportswear","leggings"]
+};
+const departmentIds = new Set(departments.map(d => d.id));
+// Imported products carry a department id as category; only free-text categories are matched by words.
+const inDepartment = (p: Product, id: string) => departmentIds.has(p.category)
+  ? p.category === id
+  : (departmentWords[id] || [id]).some(term => (p.category || "").toLowerCase().includes(term));
+
 const money = (price?: number, currency = "EUR", locale = "de-DE") => typeof price === "number" ? new Intl.NumberFormat(locale, { style:"currency", currency }).format(price) : "—";
 const localeFromBrowser = (): Locale => {
   if (typeof navigator === "undefined") return "DE";
@@ -102,20 +115,15 @@ export default function LuxuryStorefront() {
   useEffect(() => { try { localStorage.setItem("helpmey_luxury_cart", JSON.stringify(cart)); } catch {} }, [cart]);
 
   const activeDepartment = departments.find(d => d.id === department)!;
-  const products = useMemo(() => {
-    const departmentWords: Record<string,string[]> = {
-      sneakers:["sneaker","shoe","shoes","schuh"], smartphones:["smartphone","phone","telefon"], computers:["computer","laptop","notebook"],
-      bluetooth:["bluetooth","audio","headphone","kopfhörer"], "womens-clothing":["damen","women","clothing","bekleidung"],
-      innerwear:["underwear","innerwear","wäsche","unterwäsche"], eveningwear:["evening","abend","dress","kleid"],
-      "mens-suits":["suit","anzug","menswear","herren"], perfumes:["perfume","parfum","parfüm","fragrance","duft"],
-      watches:["watch","uhr"], "womens-bags":["bag","tasche","handbag"], sportswear:["sport","sportswear","leggings"]
-    };
-    const terms = departmentWords[department] || [department];
-    // Imported products carry a department id as category; only free-text categories are matched by words.
-    const ids = new Set(departments.map(d => d.id));
-    const matched = inventory.filter(p => ids.has(p.category) ? p.category === department : terms.some(term => (p.category || "").toLowerCase().includes(term)));
-    return matched.slice(0,20);
-  }, [inventory, department]);
+  const products = useMemo(() => inventory.filter(p => inDepartment(p, department)).slice(0,20), [inventory, department]);
+  // Once the catalogue has loaded, the menu lists only departments that have products.
+  const shownDepartments = useMemo(() => {
+    const stocked = departments.filter(d => inventory.some(p => inDepartment(p, d.id)));
+    return stocked.length ? stocked : departments;
+  }, [inventory]);
+  useEffect(() => {
+    if (!shownDepartments.some(d => d.id === department)) { setDepartment(shownDepartments[0].id); setStep("catalog"); }
+  }, [shownDepartments, department]);
   const visible = products.filter(p => (p.title + " " + p.category).toLowerCase().includes(search.toLowerCase()));
   const cartCount = cart.reduce((n,line) => n + line.quantity, 0);
   const subtotal = cart.reduce((n,line) => n + (line.product.price || 0) * line.quantity, 0);
@@ -140,7 +148,7 @@ export default function LuxuryStorefront() {
       </div>
     </header>
     <nav className="luxury-departments" aria-label={t.all}>
-      {departments.map(item => { const Icon = item.icon; return <button key={item.id} className={department===item.id?"active":""} onClick={()=>{setDepartment(item.id);setStep("catalog");}}><Icon size={19}/><span>{item[locale.toLowerCase() as "de"|"en"|"ar"]}</span></button>; })}
+      {shownDepartments.map(item => { const Icon = item.icon; return <button key={item.id} className={department===item.id?"active":""} onClick={()=>{setDepartment(item.id);setStep("catalog");}}><Icon size={19}/><span>{item[locale.toLowerCase() as "de"|"en"|"ar"]}</span></button>; })}
     </nav>
 
     {step === "catalog" && <>
