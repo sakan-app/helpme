@@ -48,3 +48,41 @@
 }
 @media(max-width:390px){.hm-head-actions{gap:4px}.hm-head-actions .hm-account-button{padding-inline:6px;font-size:6px}.hm-head-actions>.hm-nav-icon,.hm-nav-language{min-width:32px;padding-inline:6px}.hm-hero{min-height:470px}}
 @media(max-height:650px) and (min-width:701px){.hm-hero{min-height:420px}.hm-hero-copy{padding:20px 0}.hm-hero h1{font-size:clamp(40px,5vw,64px)}.hm-hero-stamp{width:135px;height:135px}}
+
+/* Helpmey premium payment selection */
+.hm-payment-total{display:flex;align-items:center;justify-content:space-between;margin:6px 0 10px;padding:15px 17px;border:1px solid #c9a66d77;background:linear-gradient(100deg,#382a19,#19140e);color:#d7c4a3;font-size:10px;letter-spacing:.13em;text-transform:uppercase}
+.hm-payment-total strong{color:#f1d8a6;font:500 25px 'Cormorant Garamond',Georgia,serif;letter-spacing:0}
+.hm-payment-intro{margin:12px 0 16px!important}
+.hm-payment-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:16px 0}
+.hm-pay-option{min-width:0;min-height:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:12px 5px;border:1px solid #c9a66d55;background:linear-gradient(145deg,#211b13,#100e0b);color:#f1e5d0;transition:transform .2s,border-color .2s,box-shadow .2s,background .2s}
+.hm-pay-option:hover{transform:translateY(-3px);border-color:#e4c58d;box-shadow:0 8px 24px #d4b47722}
+.hm-pay-option.active{border-color:#f0d29b;background:linear-gradient(145deg,#4a3821,#21170d);box-shadow:0 0 0 1px #d9b77b55,0 0 25px #d4b4772b}
+.hm-pay-option>strong{font-size:10px;letter-spacing:.04em}
+.hm-pay-option>small{font-size:8px;color:#b7a88f}
+.hm-brand-mastercard{position:relative;width:49px;height:29px;display:block}
+.hm-brand-mastercard i,.hm-brand-mastercard b{position:absolute;top:2px;width:27px;height:27px;border-radius:50%;display:block}
+.hm-brand-mastercard i{left:3px;background:#eb001b}
+.hm-brand-mastercard b{right:3px;background:#f79e1b;mix-blend-mode:screen;opacity:.95}
+.hm-brand-visa{height:29px;display:flex;align-items:center;color:#fff;font:italic 900 25px Arial,sans-serif;letter-spacing:-.08em}
+.hm-brand-paypal{width:30px;height:30px;display:grid;place-items:center;color:#fff;font:bold italic 27px Arial,sans-serif;filter:drop-shadow(2px 1px 0 #009cde)}
+.hm-brand-paypal b{font-style:italic}
+.hm-brand-stripe{height:29px;display:flex;align-items:center;color:#fff;font:800 24px Arial,sans-serif;letter-spacing:-.08em}
+.hm-payment-entry{margin-top:18px;padding:17px;border:1px solid #d4b47788;background:linear-gradient(145deg,#251d13,#110e0a);animation:hm-pay-in .25s ease-out}
+@keyframes hm-pay-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.hm-payment-entry-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}
+.hm-payment-entry-head h3{margin:4px 0 0;color:#f3e3c5;font:400 25px 'Cormorant Garamond',Georgia,serif}
+.hm-payment-clear{width:31px;height:31px;display:grid;place-items:center;border:1px solid #c9a66d66;background:transparent;color:#e9d5ad}
+.hm-card-fields{display:flex;flex-direction:column;gap:12px}
+.hm-card-fields>div{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hm-card-fields label{display:flex;flex-direction:column;gap:6px;color:#d7bd8d;font-size:8px;letter-spacing:.12em;text-transform:uppercase}
+.hm-card-fields input{width:100%;height:42px;min-width:0;padding:0 11px;border:1px solid #c9a66d66;background:#0e0c09;color:#f4ead9;font-size:11px;letter-spacing:.04em}
+.hm-card-fields input:focus{outline:1px solid #e3c38b;border-color:#e3c38b}
+.hm-paypal-continue{width:100%;min-height:48px;display:flex;align-items:center;justify-content:center;gap:11px;margin:14px 0;padding:8px;border:1px solid #4b9bd1;background:#0878bd;color:white;font-size:11px;font-weight:700}
+.hm-paypal-continue .hm-brand-paypal{width:24px;height:24px;font-size:22px}
+.hm-stripe-preview{display:flex;align-items:center;gap:10px;min-height:48px;margin:13px 0;padding:12px;border:1px dashed #bda47788;background:#ffffff05;color:#e1d1b3;font-size:10px}
+.hm-security-row{display:flex;justify-content:center;flex-wrap:wrap;gap:15px;margin:17px 0 8px;padding-top:13px;border-top:1px solid #c9a66d44}
+.hm-security-row span{display:flex;align-items:center;gap:6px;color:#d6c094;font-size:7px;font-weight:700;letter-spacing:.1em}
+.hm-security-row svg{color:#b8a06e}
+.hm-payment-entry .hm-demo-note{font-size:8px;line-height:1.7}
+.hm-payment-notice{padding:11px;border:1px solid #c9a66d77;background:#ffffff08;color:#eed6a5!important}
+@media(max-width:700px){.hm-payment-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hm-pay-option{min-height:100px}.hm-payment-entry{padding:13px}.hm-security-row{gap:9px}}
