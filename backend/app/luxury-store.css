@@ -302,3 +302,17 @@
  .hm-head-actions>.hm-nav-icon,.hm-head-actions>button:not(.hm-account-button){flex-basis:36px;width:36px;height:36px}
  .hm-head-actions>.hm-account-button{flex-basis:36px;width:36px!important;min-width:36px;height:36px}
 }
+
+/* Ensure the palace hero reaches both viewport edges */
+.hm-hero{
+ width:100vw;
+ margin-inline:calc(50% - 50vw);
+ height:calc(100vh - 139px);
+ min-height:calc(100svh - 139px);
+ background-size:cover;
+ background-position:center center;
+ background-repeat:no-repeat;
+}
+@media(max-width:700px){
+ .hm-hero{width:100vw;margin-inline:calc(50% - 50vw);height:calc(100svh - 120px);min-height:420px}
+}
