@@ -1,12 +1,12 @@
-// Fills the Supabase `products` table with CJ Dropshipping products for each storefront department.
+// Fills the Supabase `products` table with CJ Dropshipping products for each storefront category.
 // Safe to re-run: products are keyed by "cj-<pid>" and updated in place.
-// Usage (from backend/): node --env-file=.env.local scripts/import-cj-products.mjs [perDepartment] [--only=<department>] [--dry-run]
+// Usage (from backend/): node --env-file=.env.local scripts/import-cj-products.mjs [perCategory] [--only=<category>] [--dry-run]
 //   Needs CJ_API_KEY, NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY. --dry-run lists what would
-//   be imported, without saving.
+//   be imported, without saving. The storefront shows up to 50 products per category.
 //
 // Same rules as NEXORA: only unbranded pieces (on CJ, designer names are counterfeits that EU customs
-// seize), only names that match the department and name a premium material, and a minimum supplier price.
-// Electronics (ElektroG registration) and perfume (EU cosmetics rules, hazardous shipping) are not imported.
+// seize), only names that match the product type and name a premium material, and a minimum supplier price.
+// Beauty and perfume (EU cosmetics regulation, hazardous shipping) and electronics (ElektroG) are not imported.
 //
 // Pricing (same as SakanVIP and NEXORA): supplier price (USD -> EUR, ECB rate) x 2.5 (MARKUP_PERCENT 150),
 // plus CJ's cheapest shipping to Germany within MAX_SHIPPING_DAYS and the EU import VAT CJ collects (IOSS),
@@ -16,10 +16,10 @@
 import { createClient } from "@supabase/supabase-js";
 
 const DRY_RUN = process.argv.includes("--dry-run");
-const PER_DEPARTMENT = Number(process.argv.find(a => /^\d+$/.test(a)) || 12);
+const PER_CATEGORY = Number(process.argv.find(a => /^\d+$/.test(a)) || 50);
 const ONLY = process.argv.find(a => a.startsWith("--only="))?.slice(7);
-// Minimum supplier price (USD) per department: below these, CJ items rarely look premium.
-const MIN_SUPPLIER = { sneakers: 25, "womens-clothing": 25, innerwear: 12, eveningwear: 35, "mens-suits": 40, watches: 45, "womens-bags": 30, sportswear: 15 };
+// Minimum supplier price (USD) per product type: below these, CJ items rarely look premium.
+const MIN_SUPPLIER = { sneakers: 25, womenswear: 25, menswear: 25, innerwear: 12, eveningwear: 35, suits: 40, watches: 45, bags: 30, sportswear: 15, jewelry: 18, gifts: 20 };
 const MARKUP_PERCENT = Number(process.env.MARKUP_PERCENT ?? 150);
 const MIN_PRICE = Number(process.env.MIN_PRICE ?? 39.99);
 const IOSS_RATE = Number(process.env.IOSS_RATE ?? 0.21);
@@ -27,82 +27,83 @@ const IOSS_FEE_USD = 0.05;
 const MAX_SHIPPING_DAYS = Number(process.env.MAX_SHIPPING_DAYS ?? 20);
 const MAX_VARIANT_SPREAD = 1.15;
 const SHIP_TO = process.env.SHIP_TO || "DE";
-const MAX_PAGES = 3;
+const MAX_PAGES = 5;
 const CJ = "https://developers.cjdropshipping.com/api2.0/v1";
 const SAMPLE_IDS = ["leggings", "tote", "watch", "gift"];
+// Categories used before the "Luxury Beyond Limits" storefront; moved to its category ids on every run.
+const LEGACY_CATEGORIES = { sneakers: "fashion", "womens-clothing": "fashion", innerwear: "fashion", eveningwear: "fashion", "mens-suits": "fashion", "womens-bags": "bags" };
 
-// Department ids match `departments` in components/luxury-storefront.tsx. The first searches win.
+// `category` is the storefront category id (`categories` in components/luxury-storefront.tsx); `type` picks
+// the filter rules below. Within a category each search fills only its share, so categories mix their searches.
 const SEARCHES = [
-  { department: "sneakers", keyword: "genuine leather sneakers women" },
-  { department: "sneakers", keyword: "genuine leather sneakers men" },
-  { department: "sneakers", keyword: "suede sneakers" },
-  { department: "sneakers", keyword: "cowhide leather sneakers" },
-  { department: "womens-clothing", keyword: "silk dress women" },
-  { department: "womens-clothing", keyword: "satin blouse women" },
-  { department: "womens-clothing", keyword: "cashmere sweater women" },
-  { department: "womens-clothing", keyword: "wool coat women" },
-  { department: "womens-clothing", keyword: "linen dress women" },
-  { department: "innerwear", keyword: "mulberry silk underwear women" },
-  { department: "innerwear", keyword: "silk bra" },
-  { department: "innerwear", keyword: "modal boxer briefs men" },
-  { department: "innerwear", keyword: "lace bralette" },
-  { department: "innerwear", keyword: "silk camisole" },
-  { department: "eveningwear", keyword: "satin evening gown" },
-  { department: "eveningwear", keyword: "sequin evening gown" },
-  { department: "eveningwear", keyword: "velvet evening dress" },
-  { department: "eveningwear", keyword: "lace evening gown" },
-  { department: "mens-suits", keyword: "wool suit men" },
-  { department: "mens-suits", keyword: "tuxedo men wool" },
-  { department: "mens-suits", keyword: "wool blazer men" },
-  { department: "mens-suits", keyword: "linen suit men" },
-  { department: "watches", keyword: "automatic mechanical watch sapphire" },
-  { department: "watches", keyword: "mechanical watch stainless steel" },
-  { department: "watches", keyword: "women automatic watch" },
-  { department: "womens-bags", keyword: "genuine leather handbag" },
-  { department: "womens-bags", keyword: "cowhide leather tote bag" },
-  { department: "womens-bags", keyword: "genuine leather crossbody bag" },
-  { department: "womens-bags", keyword: "leather clutch bag" },
-  { department: "sportswear", keyword: "seamless yoga set women" },
-  { department: "sportswear", keyword: "sports leggings women" },
-  { department: "sportswear", keyword: "quick dry tracksuit men" },
-  { department: "sportswear", keyword: "merino running shirt" }
+  ...[
+    ["womenswear", "silk dress women"], ["womenswear", "satin blouse women"], ["womenswear", "cashmere sweater women"],
+    ["womenswear", "wool coat women"], ["womenswear", "linen dress women"], ["womenswear", "silk skirt women"],
+    ["womenswear", "cashmere cardigan women"], ["eveningwear", "satin evening gown"], ["eveningwear", "sequin evening gown"],
+    ["eveningwear", "velvet evening dress"], ["eveningwear", "lace evening gown"], ["eveningwear", "chiffon evening dress"],
+    ["suits", "wool suit men"], ["suits", "wool blazer men"], ["suits", "linen suit men"], ["menswear", "cashmere sweater men"],
+    ["menswear", "wool coat men"], ["menswear", "silk shirt men"], ["menswear", "linen shirt men"],
+    ["sneakers", "genuine leather sneakers women"], ["sneakers", "genuine leather sneakers men"], ["sneakers", "suede sneakers"],
+    ["innerwear", "mulberry silk underwear women"], ["innerwear", "silk camisole"], ["innerwear", "modal boxer briefs men"]
+  ].map(([type, keyword]) => ({ category: "fashion", type, keyword })),
+  ...["genuine leather handbag", "cowhide leather tote bag", "genuine leather crossbody bag", "leather clutch bag",
+    "genuine leather shoulder bag", "cowhide bucket bag", "genuine leather backpack women", "genuine leather briefcase men"]
+    .map(keyword => ({ category: "bags", type: "bags", keyword })),
+  ...["automatic mechanical watch sapphire", "mechanical watch stainless steel", "women automatic watch", "skeleton automatic watch",
+    "automatic chronograph watch", "automatic dress watch", "automatic diver watch sapphire"]
+    .map(keyword => ({ category: "watches", type: "watches", keyword })),
+  ...["925 sterling silver bracelet", "925 sterling silver earrings", "freshwater pearl earrings", "moissanite necklace",
+    "18k gold plated ring", "925 sterling silver ring", "pearl bracelet", "moissanite earrings"]
+    .map(keyword => ({ category: "jewelry", type: "jewelry", keyword })),
+  ...["925 sterling silver necklace", "pearl necklace", "moissanite ring", "18k gold plated earrings", "silk scarf",
+    "cashmere scarf", "genuine leather wallet", "genuine leather belt", "925 silver cufflinks"]
+    .map(keyword => ({ category: "gifts", type: "gifts", keyword })),
+  ...["seamless yoga set women", "sports leggings women", "quick dry tracksuit men", "merino running shirt",
+    "seamless sports bra", "yoga jacket women", "compression shorts men", "breathable running jacket"]
+    .map(keyword => ({ category: "sportswear", type: "sportswear", keyword }))
 ];
 
 // Designer and sportswear brand names and replica wording: never imported.
 const BRANDS = /\b(gucci|louis ?vuitton|lv|chanel|dior|prada|herm[eè]s|rolex|cartier|omega|versace|armani|burberry|fendi|balenciaga|ysl|saint ?laurent|givenchy|valentino|bvlgari|bulgari|tiffany|patek|audemars|piguet|michael ?kors|coach|celine|c[eé]line|loewe|bottega|moncler|tom ?ford|calvin ?klein|hublot|tag ?heuer|breitling|longines|tissot|seiko|casio|swarovski|pandora|montblanc|mont ?blanc|ralph ?lauren|lacoste|boss|hugo|dolce|gabbana|d&g|miu ?miu|jimmy ?choo|nike|adidas|jordan|yeezy|new ?balance|converse|vans|puma|asics|reebok|fila|skechers|golden ?goose|alexander ?mcqueen|mcqueen|lululemon|under ?armou?r|gymshark|victoria'?s ?secret|hanes|replica|copy|dupe|inspired|1:1|aaa)\b/i;
-// Never fits the store, in any department.
+// Never fits the store, for any product type.
 const EXCLUDED = /\b(baby|infant|toddler|kids?|child(ren)?'?s?|girls'?|boys'?|pet|puppy|dog|cat|costume|halloween|cosplay|cos|cheap|wholesale|plus size|pregnan\w*|maternity|usb|led|tool|kitchen|car|fishing|garden|digital|smart ?watch|cartoon|anime|funny|novelty|printed|print|letters?|slogan|hot sale|cute|korean|beer|pu|faux|imitation|plastic|acrylic|student|couple|neon|rainbow|fluorescent|multicolor|20\d\d|new style|disposable)\b/i;
-// Extra exclusions per department; sportswear and innerwear allow the words the others reject.
+// Extra exclusions per type; sportswear, sneakers and innerwear allow some words the others reject.
 const STRICT = /\b(sexy|lingerie|pajamas?|sleepwear|sports?|gym|workout|yoga|running|casual|simple|basic|trendy|trend|loose|oversized|fashion|polyester|quartz)\b/i;
 const EXTRA_EXCLUDED = {
   sneakers: /\b(sexy|lingerie|pajamas?|sleepwear|yoga|loose|oversized|polyester|slippers?|sandals?|boots?)\b/i,
   innerwear: /\b(sexy|erotic|crotchless|transparent|see[- ]through|sports?|gym|workout|running|casual|trendy|oversized|fashion|polyester)\b/i,
   sportswear: /\b(sexy|lingerie|pajamas?|sleepwear|loose|oversized)\b/i
 };
-// Each department needs a premium material or build in the product name.
+// Each type needs a premium material or build in the product name.
 const MATERIALS = {
   sneakers: /\b(genuine leather|cowhide|calfskin|real leather|suede|nubuck)\b/i,
-  "womens-clothing": /\b(silk|satin|cashmere|wool|merino|velvet|linen|lace|tweed|mulberry)\b/i,
+  womenswear: /\b(silk|satin|cashmere|wool|merino|velvet|linen|lace|tweed|mulberry)\b/i,
+  menswear: /\b(silk|cashmere|wool|merino|velvet|linen|tweed|mulberry)\b/i,
   innerwear: /\b(silk|mulberry|modal|lace|cashmere|merino|bamboo|cotton)\b/i,
   eveningwear: /\b(satin|silk|velvet|lace|sequin(ed)?|beaded|crystal|chiffon)\b/i,
-  "mens-suits": /\b(wool|cashmere|merino|tweed|linen|velvet|silk)\b/i,
+  suits: /\b(wool|cashmere|merino|tweed|linen|velvet|silk)\b/i,
   watches: /\b(automatic|mechanical|sapphire|tourbillon|stainless steel)\b/i,
-  "womens-bags": /\b(genuine leather|cowhide|calfskin|real leather|suede)\b/i,
-  sportswear: /\b(seamless|quick[- ]dry|breathable|compression|nylon|spandex|lycra|merino|moisture[- ]wicking)\b/i
+  bags: /\b(genuine leather|cowhide|calfskin|real leather|suede)\b/i,
+  sportswear: /\b(seamless|quick[- ]dry|breathable|compression|nylon|spandex|lycra|merino|moisture[- ]wicking)\b/i,
+  jewelry: /\b(925|sterling|18k|14k|gold|pearl|moissanite)\b/i,
+  gifts: /\b(925|sterling|18k|14k|gold|pearl|moissanite|zircon|cubic zirconia|silk|cashmere|genuine leather|cowhide|calfskin|real leather)\b/i
 };
-const DEPARTMENT_WORDS = {
+const TYPE_WORDS = {
   sneakers: /sneakers?|trainers?|shoes/i,
-  "womens-clothing": /dress|blouse|shirt|coat|blazer|skirt|cardigan|sweater|trench|jumpsuit/i,
+  womenswear: /dress|blouse|shirt|coat|blazer|skirt|cardigan|sweater|trench|jumpsuit/i,
+  menswear: /sweater|coat|shirt|jacket|cardigan|trousers|pants|overcoat/i,
   innerwear: /underwear|bra\b|bralette|briefs|boxers?|panties|knickers|camisole|undershirt|thong/i,
   eveningwear: /dress|gown/i,
-  "mens-suits": /suit|blazer|tuxedo/i,
+  suits: /suit|blazer|tuxedo/i,
   watches: /watch/i,
-  "womens-bags": /bag|handbag|tote|clutch|purse|crossbody/i,
-  sportswear: /leggings|sports bra|set|tracksuit|shorts|top|shirt|jacket|hoodie|tank|jogger|pants/i
+  bags: /bag|handbag|tote|clutch|purse|crossbody|backpack|briefcase/i,
+  sportswear: /leggings|sports bra|set|tracksuit|shorts|top|shirt|jacket|hoodie|tank|jogger|pants/i,
+  jewelry: /necklace|bracelet|bangle|earrings?|\bring\b|pendant|brooch|anklet/i,
+  gifts: /necklace|bracelet|earrings?|ring|pendant|brooch|cufflinks?|scarf|shawl|wallet|belt|card holder/i
 };
-const fitsStore = (name, department) => !BRANDS.test(name) && !EXCLUDED.test(name) &&
-  !(EXTRA_EXCLUDED[department] ?? STRICT).test(name) &&
-  DEPARTMENT_WORDS[department].test(name) && MATERIALS[department].test(name);
+const fitsStore = (name, type) => !BRANDS.test(name) && !EXCLUDED.test(name) &&
+  !(EXTRA_EXCLUDED[type] ?? STRICT).test(name) && TYPE_WORDS[type].test(name) && MATERIALS[type].test(name);
+
 // Variant colours that do not fit the palette are not offered.
 const LOUD_COLOR = /\b(neon|fluorescent|rainbow|multi-?colou?r|colorful|hot pink|rose red|fuchsia|lime|orange|yellow|purple|light green|candy)\b/i;
 
@@ -182,7 +183,7 @@ const images = detail => {
 const cleanDescription = html => String(html || "").replace(/<img[^>]*>/gi, " ").replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim().slice(0, 2000);
 
 // Builds the products row; null when no variant fits the palette and price spread.
-function productRow(department, item, detail, shipping) {
+function productRow(category, type, item, detail, shipping) {
   const dims = String(detail?.productKeyEn || "").split("-").map(d => d.trim()).filter(Boolean);
   const items = [];
   for (const v of detail?.variants || []) {
@@ -204,10 +205,10 @@ function productRow(department, item, detail, shipping) {
   const pics = images(detail);
   const unique = list => [...new Set(list.filter(Boolean))].slice(0, 40);
   return {
-    id: `cj-${item.id}`, title: cleanName(item.name), category: department,
+    id: `cj-${item.id}`, title: cleanName(item.name), category,
     description: cleanDescription(detail?.description), price: Math.max(...offered.map(v => v.priceCents)) / 100,
     currency: "EUR", image_url: pics[0] || item.image, sku: null, supplier: "CJ", inventory: 100, active: true,
-    variants: { sizes: unique(offered.map(v => v.size)), colors: unique(offered.map(v => v.color)), images: pics, cjPid: item.id, shippingUsd: shipping, items: offered },
+    variants: { sizes: unique(offered.map(v => v.size)), colors: unique(offered.map(v => v.color)), images: pics, cjPid: item.id, type, shippingUsd: shipping, items: offered },
     updated_at: new Date().toISOString()
   };
 }
@@ -217,7 +218,7 @@ if (!CJ_API_KEY || (!DRY_RUN && (!NEXT_PUBLIC_SUPABASE_URL || !SUPABASE_SERVICE_
   console.error("Set CJ_API_KEY, NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.");
   process.exit(1);
 }
-if (ONLY && !SEARCHES.some(s => s.department === ONLY)) { console.error(`Unknown department: ${ONLY}`); process.exit(1); }
+if (ONLY && !SEARCHES.some(s => s.category === ONLY)) { console.error(`Unknown category: ${ONLY}`); process.exit(1); }
 const auth = await (await fetch(CJ + "/authentication/getAccessToken", {
   method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ apiKey: CJ_API_KEY })
 })).json();
@@ -228,32 +229,40 @@ if (!USD_PER_EUR) {
   USD_PER_EUR = Number(/currency='USD' rate='([\d.]+)'/.exec(xml)?.[1]);
   if (!(USD_PER_EUR > 0)) throw new Error("Could not read the ECB USD rate; set USD_PER_EUR.");
 }
-console.log(`1 EUR = ${USD_PER_EUR} USD · ${PER_DEPARTMENT} per department${DRY_RUN ? " · DRY RUN" : ""}`);
+console.log(`1 EUR = ${USD_PER_EUR} USD · ${PER_CATEGORY} per category${DRY_RUN ? " · DRY RUN" : ""}`);
 
 const db = DRY_RUN ? null : createClient(NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 const runStarted = new Date().toISOString();
 const count = {};
 const usedPids = new Set();
-// Each search may fill only its share of the department, so a department mixes its searches.
-const searchesIn = d => SEARCHES.filter(s => s.department === d).length;
-for (const { department, keyword } of SEARCHES.filter(s => !ONLY || s.department === ONLY)) {
-  if ((count[department] || 0) >= PER_DEPARTMENT) continue;
-  const share = Math.ceil(PER_DEPARTMENT / searchesIn(department));
-  const limit = Math.min(PER_DEPARTMENT, (count[department] || 0) + share);
-  for (let page = 1; page <= MAX_PAGES && (count[department] || 0) < limit; page++) {
+if (db) {
+  // Products imported for the earlier storefront move to its category ids.
+  for (const [from, to] of Object.entries(LEGACY_CATEGORIES)) {
+    const { error } = await db.from("products").update({ category: to }).eq("category", from);
+    if (error) throw new Error("Could not move legacy categories: " + error.message);
+  }
+}
+const searchesIn = c => SEARCHES.filter(s => s.category === c).length;
+// First pass: each search fills only its share. Second pass: any search tops the category up to its target.
+for (const pass of [1, 2])
+for (const { category, type, keyword } of SEARCHES.filter(s => !ONLY || s.category === ONLY)) {
+  if ((count[category] || 0) >= PER_CATEGORY) continue;
+  const share = Math.ceil(PER_CATEGORY / searchesIn(category));
+  const limit = pass === 1 ? Math.min(PER_CATEGORY, (count[category] || 0) + share) : PER_CATEGORY;
+  for (let page = 1; page <= MAX_PAGES && (count[category] || 0) < limit; page++) {
     const url = `/product/listV2?page=${page}&size=100&keyWord=${encodeURIComponent(keyword)}`;
     const list = (await cj(url))?.content?.flatMap(c => c.productList || []) || [];
     const candidates = list
       .map(p => ({ id: String(p.id || ""), name: String(p.nameEn || "").replace(/\s+/g, " ").trim(), price: firstNumber(p.sellPrice), image: p.bigImage }))
-      .filter(p => p.id && !usedPids.has(p.id) && p.name && /^[\x20-\x7E]+$/.test(p.name) && p.price >= MIN_SUPPLIER[department] &&
-        fitsStore(p.name, department) && /^https:\/\//.test(p.image || ""));
+      .filter(p => p.id && !usedPids.has(p.id) && p.name && /^[\x20-\x7E]+$/.test(p.name) && p.price >= MIN_SUPPLIER[type] &&
+        fitsStore(p.name, type) && /^https:\/\//.test(p.image || ""));
     for (const item of candidates) {
-      if ((count[department] || 0) >= limit) break;
+      if ((count[category] || 0) >= limit) break;
       usedPids.add(item.id);
-      // A piece already shown in another department stays there (an upsert would move it).
+      // A piece already shown in another category stays there (an upsert would move it).
       if (db) {
         const { data: existing } = await db.from("products").select("category,active").eq("id", `cj-${item.id}`).maybeSingle();
-        if (existing?.active && existing.category !== department) continue;
+        if (existing?.active && existing.category !== category) continue;
       }
       try {
         const detail = await cj(`/product/query?pid=${item.id}`);
@@ -261,21 +270,21 @@ for (const { department, keyword } of SEARCHES.filter(s => !ONLY || s.department
         if (shipping == null) { console.log(`  skip (no shipping to ${SHIP_TO}): ${item.name.slice(0, 60)}`); continue; }
         // Bulky items whose shipping costs more than the product itself do not fit the price range.
         if (shipping > item.price) { console.log(`  skip (shipping $${shipping} > price): ${item.name.slice(0, 60)}`); continue; }
-        const row = productRow(department, item, detail, shipping);
+        const row = productRow(category, type, item, detail, shipping);
         if (!row) { console.log(`  skip (no variant in the palette): ${item.name.slice(0, 60)}`); continue; }
         if (!DRY_RUN) {
           const { error } = await db.from("products").upsert(row, { onConflict: "id" });
           if (error) throw new Error(error.message);
         }
-        console.log(`  ${department}: €${row.price.toFixed(2)} · ${row.variants.items.length} variants · ${row.title.slice(0, 60)}`);
-        count[department] = (count[department] || 0) + 1;
+        console.log(`  ${category}/${type}: €${row.price.toFixed(2)} · ${row.variants.items.length} variants · ${row.title.slice(0, 60)}`);
+        count[category] = (count[category] || 0) + 1;
       } catch (err) {
         console.warn(`  failed ${item.id}: ${err.message}`);
       }
     }
     if (!list.length) break;
   }
-  console.log(`${department}: ${count[department] || 0} so far ("${keyword}")`);
+  console.log(`${category}: ${count[category] || 0} so far ("${keyword}", pass ${pass})`);
 }
 if (db) {
   // A full run defines the catalogue: CJ products from earlier runs that no longer pass the rules are hidden.

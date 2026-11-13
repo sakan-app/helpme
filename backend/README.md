@@ -65,13 +65,13 @@ Public build-time values (Supabase URL, publishable key, site URL) are in `.env.
 
 ### Products from CJ Dropshipping
 
-`scripts/import-cj-products.mjs` fills the `products` table from CJ with the same rules as NEXORA and SakanVIP (no brand names, premium materials only, price = supplier price x 2.5 + shipping to Germany + EU import VAT, ending in ,99). Electronics and perfume departments are skipped on purpose (ElektroG registration, EU cosmetics and hazardous-goods rules). Re-run it from `backend/` with `CJ_API_KEY` set:
+`scripts/import-cj-products.mjs` fills the `products` table from CJ with the same rules as NEXORA and SakanVIP (no brand names, premium materials only, price = supplier price x 2.5 + shipping to Germany + EU import VAT, ending in ,99). It fills the storefront categories fashion, bags, watches, jewelry, gifts and sportswear (up to 50 each, the number the storefront shows). Beauty and perfume are skipped on purpose (EU cosmetics regulation, hazardous-goods shipping), as are electronics (ElektroG). Re-run it from `backend/` with `CJ_API_KEY` set:
 
 ```bash
-node --env-file=.env.local scripts/import-cj-products.mjs 12 --dry-run
+node --env-file=.env.local scripts/import-cj-products.mjs 50 --dry-run
 ```
 
-Drop `--dry-run` to save; `--only=<department id>` limits it to one department. A full run hides CJ products it no longer imports and the four showcase samples.
+Drop `--dry-run` to save; `--only=<category id>` limits it to one category. A full run hides CJ products it no longer imports and the four showcase samples.
 
 Without Upstash, rate limiting uses the `rate_limit_counters` table and `rate_limit_hit` function from migration 005 through the service-role key. The root `index.html` on GitHub Pages only redirects to the Worker.
 
