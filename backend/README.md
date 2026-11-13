@@ -65,7 +65,7 @@ Public build-time values (Supabase URL, publishable key, site URL) are in `.env.
 
 ### Products from CJ Dropshipping
 
-`scripts/import-cj-products.mjs` fills the `products` table from CJ with the same rules as NEXORA and SakanVIP (no brand names, premium materials only, price = supplier price x 2.5 + shipping to Germany + EU import VAT, ending in ,99). It fills the storefront categories fashion, bags, watches, jewelry, gifts and sportswear (up to 50 each, the number the storefront shows). Beauty and perfume are skipped on purpose (EU cosmetics regulation, hazardous-goods shipping), as are electronics (ElektroG). Re-run it from `backend/` with `CJ_API_KEY` set:
+`scripts/import-cj-products.mjs` fills the `products` table from CJ with the same rules as NEXORA and SakanVIP (no brand names, premium materials only, price = supplier price x 2.5 + shipping to Germany + EU import VAT, ending in ,99). It fills the storefront categories fashion, bags, watches, jewelry, gifts, sportswear, beauty and perfumes (up to 50 each, the number the storefront shows). Beauty and perfumes get accessories only (brushes, mirrors, atomizers, bottles), never cosmetics or scents (EU Cosmetics Regulation); electronics are skipped (ElektroG). Re-run it from `backend/` with `CJ_API_KEY` set:
 
 ```bash
 node --env-file=.env.local scripts/import-cj-products.mjs 50 --dry-run

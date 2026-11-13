@@ -6,7 +6,8 @@
 //
 // Same rules as NEXORA: only unbranded pieces (on CJ, designer names are counterfeits that EU customs
 // seize), only names that match the product type and name a premium material, and a minimum supplier price.
-// Beauty and perfume (EU cosmetics regulation, hazardous shipping) and electronics (ElektroG) are not imported.
+// Beauty and perfumes get accessories only (brushes, mirrors, atomizers, bottles): cosmetics and scents need an EU
+// responsible person and CPNP notification (Regulation 1223/2009). Electronics (ElektroG) are not imported.
 //
 // Pricing (same as SakanVIP and NEXORA): supplier price (USD -> EUR, ECB rate) x 2.5 (MARKUP_PERCENT 150),
 // plus CJ's cheapest shipping to Germany within MAX_SHIPPING_DAYS and the EU import VAT CJ collects (IOSS),
@@ -19,7 +20,7 @@ const DRY_RUN = process.argv.includes("--dry-run");
 const PER_CATEGORY = Number(process.argv.find(a => /^\d+$/.test(a)) || 50);
 const ONLY = process.argv.find(a => a.startsWith("--only="))?.slice(7);
 // Minimum supplier price (USD) per product type: below these, CJ items rarely look premium.
-const MIN_SUPPLIER = { sneakers: 25, womenswear: 25, menswear: 25, innerwear: 12, eveningwear: 35, suits: 40, watches: 45, bags: 30, sportswear: 15, jewelry: 18, gifts: 20 };
+const MIN_SUPPLIER = { sneakers: 25, womenswear: 25, menswear: 25, innerwear: 12, eveningwear: 35, suits: 40, watches: 45, bags: 30, sportswear: 15, jewelry: 18, gifts: 20, beauty: 10, perfume: 8 };
 const MARKUP_PERCENT = Number(process.env.MARKUP_PERCENT ?? 150);
 const MIN_PRICE = Number(process.env.MIN_PRICE ?? 39.99);
 const IOSS_RATE = Number(process.env.IOSS_RATE ?? 0.21);
@@ -60,8 +61,16 @@ const SEARCHES = [
     .map(keyword => ({ category: "gifts", type: "gifts", keyword })),
   ...["seamless yoga set women", "sports leggings women", "quick dry tracksuit men", "merino running shirt",
     "seamless sports bra", "yoga jacket women", "compression shorts men", "breathable running jacket"]
-    .map(keyword => ({ category: "sportswear", type: "sportswear", keyword }))
+    .map(keyword => ({ category: "sportswear", type: "sportswear", keyword })),
+  ...["makeup brush set", "mulberry silk scrunchies", "jade gua sha", "rose quartz facial roller", "sandalwood comb",
+    "brass vanity mirror", "genuine leather makeup bag", "velvet jewelry box", "silk sleep mask"]
+    .map(keyword => ({ category: "beauty", type: "beauty", keyword })),
+  ...["refillable perfume atomizer", "crystal perfume bottle empty", "glass perfume decanter", "leather perfume case",
+    "perfume tray mirrored", "vintage perfume bottle glass"]
+    .map(keyword => ({ category: "perfumes", type: "perfume", keyword }))
 ];
+// Accessory categories must never carry an actual cosmetic product or scent.
+const COSMETIC = /\b(cream|serum|lotion|oil|essential|lipstick|lip gloss|foundation|concealer|mascara|eyeliner|eyeshadow|blush|powder|shampoo|conditioner|gel|mask cream|sheet mask|toner|cleanser|sunscreen|spf|eau|edp|edt|parfum|cologne|body mist|deodorant|pheromone|long[- ]lasting|scent(ed)?|fragrance oil|liquid|diffuser|electric|electronic|vibrat\w*|rechargeable|battery|usb|heated|ems|microcurrent|massager)\b/i;
 
 // Designer and sportswear brand names and replica wording: never imported.
 const BRANDS = /\b(gucci|louis ?vuitton|lv|chanel|dior|prada|herm[eè]s|rolex|cartier|omega|versace|armani|burberry|fendi|balenciaga|ysl|saint ?laurent|givenchy|valentino|bvlgari|bulgari|tiffany|patek|audemars|piguet|michael ?kors|coach|celine|c[eé]line|loewe|bottega|moncler|tom ?ford|calvin ?klein|hublot|tag ?heuer|breitling|longines|tissot|seiko|casio|swarovski|pandora|montblanc|mont ?blanc|ralph ?lauren|lacoste|boss|hugo|dolce|gabbana|d&g|miu ?miu|jimmy ?choo|nike|adidas|jordan|yeezy|new ?balance|converse|vans|puma|asics|reebok|fila|skechers|golden ?goose|alexander ?mcqueen|mcqueen|lululemon|under ?armou?r|gymshark|victoria'?s ?secret|hanes|replica|copy|dupe|inspired|1:1|aaa)\b/i;
@@ -72,7 +81,9 @@ const STRICT = /\b(sexy|lingerie|pajamas?|sleepwear|sports?|gym|workout|yoga|run
 const EXTRA_EXCLUDED = {
   sneakers: /\b(sexy|lingerie|pajamas?|sleepwear|yoga|loose|oversized|polyester|slippers?|sandals?|boots?)\b/i,
   innerwear: /\b(sexy|erotic|crotchless|transparent|see[- ]through|sports?|gym|workout|running|casual|trendy|oversized|fashion|polyester)\b/i,
-  sportswear: /\b(sexy|lingerie|pajamas?|sleepwear|loose|oversized)\b/i
+  sportswear: /\b(sexy|lingerie|pajamas?|sleepwear|loose|oversized)\b/i,
+  beauty: /\b(sexy|cheap|trendy|cute|fashion|polyester)\b/i,
+  perfume: /\b(sexy|cheap|trendy|cute|fashion)\b/i
 };
 // Each type needs a premium material or build in the product name.
 const MATERIALS = {
@@ -86,6 +97,8 @@ const MATERIALS = {
   bags: /\b(genuine leather|cowhide|calfskin|real leather|suede)\b/i,
   sportswear: /\b(seamless|quick[- ]dry|breathable|compression|nylon|spandex|lycra|merino|moisture[- ]wicking)\b/i,
   jewelry: /\b(925|sterling|18k|14k|gold|pearl|moissanite)\b/i,
+  beauty: /\b(silk|mulberry|jade|rose quartz|quartz|bian|sandalwood|brass|copper|genuine leather|cowhide|velvet|crystal|goat hair|horn|wooden|walnut)\b/i,
+  perfume: /\b(crystal|glass|brass|metal|aluminium|aluminum|stainless steel|leather|ceramic|gold|silver|refillable)\b/i,
   gifts: /\b(925|sterling|18k|14k|gold|pearl|moissanite|zircon|cubic zirconia|silk|cashmere|genuine leather|cowhide|calfskin|real leather)\b/i
 };
 const TYPE_WORDS = {
@@ -99,9 +112,15 @@ const TYPE_WORDS = {
   bags: /bag|handbag|tote|clutch|purse|crossbody|backpack|briefcase/i,
   sportswear: /leggings|sports bra|set|tracksuit|shorts|top|shirt|jacket|hoodie|tank|jogger|pants/i,
   jewelry: /necklace|bracelet|bangle|earrings?|\bring\b|pendant|brooch|anklet/i,
-  gifts: /necklace|bracelet|earrings?|ring|pendant|brooch|cufflinks?|scarf|shawl|wallet|belt|card holder/i
+  gifts: /necklace|bracelet|earrings?|ring|pendant|brooch|cufflinks?|scarf|shawl|wallet|belt|card holder/i,
+  beauty: /brush(es)?|mirror|scrunchies?|gua sha|roller|comb|makeup bag|cosmetic bag|jewel(le)?ry box|sleep mask|eye mask|hair clip|headband/i,
+  perfume: /atomi[sz]er|perfume (bottle|case|tray|decanter|holder)/i
 };
-const fitsStore = (name, type) => !BRANDS.test(name) && !EXCLUDED.test(name) &&
+const ACCESSORY_TYPES = new Set(["beauty", "perfume"]);
+const fitsStore = (name, type) => !BRANDS.test(name) &&
+  // "tool" is a normal word for beauty accessories (gua sha tool), so it is not an exclusion there.
+  !EXCLUDED.test(ACCESSORY_TYPES.has(type) ? name.replace(/\btools?\b/gi, "") : name) &&
+  !(ACCESSORY_TYPES.has(type) && COSMETIC.test(name.replace(/perfume (bottle|atomi[sz]er|case|tray)/gi, ""))) &&
   !(EXTRA_EXCLUDED[type] ?? STRICT).test(name) && TYPE_WORDS[type].test(name) && MATERIALS[type].test(name);
 
 // Variant colours that do not fit the palette are not offered.
