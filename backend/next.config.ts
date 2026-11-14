@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // worker-mailer imports cloudflare:sockets; only the Worker build (OpenNext) may bundle it.
+  serverExternalPackages: ["worker-mailer"],
   async headers() {
     return [{
       source: "/:path*",
