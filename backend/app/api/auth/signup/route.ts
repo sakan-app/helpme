@@ -28,6 +28,11 @@ export async function POST(request: Request) {
     options: { emailRedirectTo: new URL("/auth/callback", origin).toString() }
   });
   if (error) return NextResponse.json({ error: "Registrierung konnte nicht abgeschlossen werden." }, { status: 400 });
+  // Supabase answers a sign-up for an existing address with a user without identities and sends no
+  // email. Customers kept registering again and then could not sign in, so the shop says it plainly.
+  if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+    return NextResponse.json({ error: "Diese E-Mail-Adresse hat bereits ein Konto. Bitte melden Sie sich an oder nutzen Sie \u201ePasswort vergessen?\u201c.", code: "account_exists" }, { status: 409 });
+  }
   return NextResponse.json({
     user: data.user ? { id: data.user.id, email: data.user.email } : null,
     message: "Bitte bestätigen Sie Ihre E-Mail-Adresse über den zugesandten Aktivierungslink."
