@@ -32,7 +32,7 @@
     // CJ fulfilment (lib/cj.ts): pay CJ orders from the shared CJ wallet when the cost check passes.
     // Stripe test payments (cs_test_...) only create CJ sandbox orders and are never paid.
     "CJ_AUTO_PAY": "on",
-    "CJ_SANDBOX": "off",
+    "CJ_SANDBOX": "on",
     "CJ_MAX_COST_SHARE": "0.6",
     "CJ_MAX_DAYS": "20",
     "CJ_LOW_BALANCE_USD": "100"
