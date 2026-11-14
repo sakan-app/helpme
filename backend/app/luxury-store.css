@@ -563,3 +563,4 @@
  .hm-hero{height:100svh;min-height:520px;padding-top:116px}
  .hm-hero-image{object-fit:contain!important;object-position:center center!important}
 }
+.hm-text-button{align-self:center;min-height:44px;border:0;background:transparent;color:#d7bd8d;font-size:11px;text-decoration:underline;cursor:pointer}.hm-newsletter-note{margin-top:12px;color:#d7bd8d;font-size:12px;line-height:1.6}

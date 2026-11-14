@@ -28,7 +28,7 @@ export async function middleware(request: NextRequest) {
   const providerWebhook = path.startsWith("/api/webhooks/") || path === "/api/payments/stripe/webhook";
   const requiresSameOrigin = request.method !== "GET" && request.method !== "HEAD" &&
     (path.startsWith("/api/auth/") || path === "/api/checkout" ||
-      (path.startsWith("/api/payments/") && !providerWebhook) || path === "/api/contact");
+      (path.startsWith("/api/payments/") && !providerWebhook) || path === "/api/contact" || path === "/api/newsletter");
   if (requiresSameOrigin && !providerWebhook) {
     const origin = request.headers.get("origin");
     if (!origin || origin !== request.nextUrl.origin) {
