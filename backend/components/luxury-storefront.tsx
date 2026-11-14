@@ -42,6 +42,12 @@ const accountText:Partial<Record<Locale,Record<string,string>>>&{EN:Record<strin
   DE:{create:"Konto erstellen",login:"Anmelden",signedIn:"Angemeldet",logout:"Abmelden",email:"E-Mail-Adresse",password:"Passwort",rule:"Mindestens 12 Zeichen mit Groß- und Kleinbuchstaben und einer Zahl. Wir senden eine Bestätigungs-E-Mail.",wait:"Bitte warten …",haveAccount:"Schon ein Konto? Anmelden",noAccount:"Neu hier? Konto erstellen",checkMail:"Bitte prüfen Sie Ihr Postfach.",failed:"Die Anfrage konnte nicht verarbeitet werden."},
   AR:{create:"إنشاء حساب",login:"تسجيل الدخول",signedIn:"تم تسجيل الدخول",logout:"تسجيل الخروج",email:"البريد الإلكتروني",password:"كلمة المرور",rule:"12 حرفاً على الأقل مع أحرف كبيرة وصغيرة ورقم. سنرسل رسالة تأكيد.",wait:"يرجى الانتظار …",haveAccount:"لديك حساب؟ سجّل الدخول",noAccount:"جديد هنا؟ أنشئ حساباً",checkMail:"يرجى التحقق من بريدك.",failed:"تعذر إكمال الطلب."}
 };
+// Messages after an account confirmation link redirects back: [German, English].
+const authStatus:Record<string,[string,string]> = {
+  "confirmed-signin":["Ihre E-Mail-Adresse ist bestätigt. Bitte melden Sie sich jetzt an.","Your email address is confirmed. Please sign in now."],
+  "link-expired":["Dieser Link wurde schon benutzt oder ist abgelaufen. Ist Ihre Adresse bereits bestätigt, melden Sie sich einfach an.","This link was already used or has expired. If your address is already confirmed, simply sign in."],
+  "confirmation-failed":["Die Bestätigung hat nicht geklappt. Bitte melden Sie sich an oder registrieren Sie sich erneut.","The confirmation did not work. Please sign in or register again."]
+};
 // Messages after the newsletter confirmation link redirects back: [German, English].
 const newsletterStatus:Record<string,[string,string]> = {
   confirmed:["Danke! Ihre Newsletter-Anmeldung ist bestätigt.","Thank you! Your newsletter subscription is confirmed."],
@@ -64,7 +70,9 @@ export default function LuxuryStorefront() {
  const t=words[lang], rtl=lang==="AR";
  const a=accountText[lang]??accountText.EN;
  useEffect(()=>{fetch("/api/auth/user",{cache:"no-store"}).then(r=>r.ok?r.json():{user:null}).then(d=>setUser(d.user??null)).catch(()=>setUser(null));
-  const status=new URLSearchParams(location.search).get("newsletter"); if(status) setNewsletterMsg((newsletterStatus[status]??newsletterStatus.error)[lang==="DE"?0:1]);},[]);
+  const params=new URLSearchParams(location.search), status=params.get("newsletter"), auth=params.get("auth"); if(status) setNewsletterMsg((newsletterStatus[status]??newsletterStatus.error)[lang==="DE"?0:1]);
+  // Returning from an email confirmation link: open the account window with the result.
+  if(auth){setAuthMode("login");setAuthMsg((authStatus[auth]??authStatus["confirmation-failed"])[lang==="DE"?0:1]);setModal("account");}},[]);
  // Account and newsletter forms talk to the real server routes (Supabase Auth, double opt-in newsletter).
  const submitAuth=async(e:FormEvent<HTMLFormElement>)=>{e.preventDefault();setAuthBusy(true);setAuthMsg("");
   try{const r=await fetch(authMode==="signup"?"/api/auth/signup":"/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:authEmail,password:authPassword})});

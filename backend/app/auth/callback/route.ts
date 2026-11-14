@@ -14,6 +14,11 @@ export async function GET(request: Request) {
     const supabase = await createSupabaseServerClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) return NextResponse.redirect(new URL(next, origin));
+    // Supabase only sends a code after it has verified the email. Signing in from the link needs the
+    // browser that registered (PKCE cookie); from another browser or mail app the account is still
+    // confirmed, so ask the customer to sign in instead of reporting a failure.
+    return NextResponse.redirect(new URL("/?auth=confirmed-signin", origin));
   }
-  return NextResponse.redirect(new URL("/?auth=confirmation-failed", origin));
+  // Expired or already used links come back with error parameters instead of a code.
+  return NextResponse.redirect(new URL(url.searchParams.get("error_code") || url.searchParams.get("error") ? "/?auth=link-expired" : "/?auth=confirmation-failed", origin));
 }
