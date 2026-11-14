@@ -5,7 +5,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "helpme-cf",
-  "main": ".open-next/worker.js",
+  "main": "custom-worker.js",
   "compatibility_date": "2026-10-27",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
@@ -28,8 +28,17 @@
     "SMTP_FROM": "Helpmey <info@digital-future.ai>",
     "CONTACT_EMAIL": "contact@digital-future.ai",
     "SERVER_EMAIL": "server@digital-future.ai",
-    "PAYPAL_API_BASE": "https://api-m.sandbox.paypal.com"
+    "PAYPAL_API_BASE": "https://api-m.sandbox.paypal.com",
+    // CJ fulfilment (lib/cj.ts): pay CJ orders from the shared CJ wallet when the cost check passes.
+    // Stripe test payments (cs_test_...) only create CJ sandbox orders and are never paid.
+    "CJ_AUTO_PAY": "on",
+    "CJ_SANDBOX": "off",
+    "CJ_MAX_COST_SHARE": "0.6",
+    "CJ_MAX_DAYS": "20",
+    "CJ_LOW_BALANCE_USD": "100"
   },
+  // Every 30 minutes: retry CJ hand-off and payment for paid orders (custom-worker.js).
+  "triggers": { "crons": ["*/30 * * * *"] },
   "observability": {
     "enabled": true
   }

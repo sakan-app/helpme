@@ -16,6 +16,14 @@ const schema = z.object({
   shippingPostalCode: z.string().max(20).optional()
 }).strict();
 
+// Imported CJ products keep their CJ variants in products.variants.items; the one matching the chosen
+// size and colour is sent to CJ after payment (lib/cj.ts).
+function cjVariant(variants: Record<string, unknown>, size?: string, color?: string): string | null {
+  const items = Array.isArray(variants.items) ? variants.items as { vid?: string; size?: string | null; color?: string | null }[] : [];
+  const match = items.find(v => (!v.size || v.size === size) && (!v.color || v.color === color)) ?? (items.length === 1 ? items[0] : undefined);
+  return match?.vid ? String(match.vid) : null;
+}
+
 export async function POST(request: Request) {
   let limit;
   try { limit = await enforceRateLimit(request, "checkout", 5, 60); }
@@ -43,7 +51,7 @@ export async function POST(request: Request) {
       const sizes = Array.isArray(variants.sizes) ? variants.sizes : [];
       const colors = Array.isArray(variants.colors) ? variants.colors : [];
       if ((item.size && sizes.length && !sizes.includes(item.size)) || (item.color && colors.length && !colors.includes(item.color))) throw new Error("variant");
-      lines.push({ product_id: product.id, product_title: product.title, quantity: item.quantity, unit_price: Number(product.price), selected_size: item.size || null, selected_color: item.color || null });
+      lines.push({ product_id: product.id, product_title: product.title, quantity: item.quantity, unit_price: Number(product.price), selected_size: item.size || null, selected_color: item.color || null, cj_vid: cjVariant(variants, item.size, item.color) });
     }
   } catch {
     return NextResponse.json({ error: "Produktvariante oder Lagerbestand ist nicht verfügbar." }, { status: 409 });
@@ -53,7 +61,7 @@ export async function POST(request: Request) {
   const total = subtotal + shipping;
   const currency = String(products[0].currency || "EUR").toLowerCase();
   if (products.some((p) => String(p.currency).toLowerCase() !== currency) || total < 1 || total > 100000000) return NextResponse.json({ error: "Ungültige Währung oder Bestellsumme." }, { status: 400 });
-  const risk = scorePaymentRisk({ amountCents: total, billingCountry: parsed.data.billingCountry, shippingCountry: parsed.data.shippingCountry, ipCountry: request.headers.get("x-vercel-ip-country") ?? request.headers.get("cf-ipcountry"), billingPostalCode: parsed.data.billingPostalCode, shippingPostalCode: parsed.data.shippingPostalCode });
+  const risk = scorePaymentRisk({ amountCents: total, billingCountry: parsed.data.billingCountry, shippingCountry: parsed.data.shippingCountry, ipCountry: request.headers.get("cf-ipcountry") ?? request.headers.get("x-vercel-ip-country"), billingPostalCode: parsed.data.billingPostalCode, shippingPostalCode: parsed.data.shippingPostalCode });
   const { data: order, error: orderError } = await admin.from("orders").insert({
     user_id: auth.user.id, status: risk.reviewRequired ? "pending_review" : "pending", currency: currency.toUpperCase(),
     subtotal: subtotal / 100, shipping_total: shipping / 100, total: total / 100, payment_provider: "stripe",
@@ -65,14 +73,17 @@ export async function POST(request: Request) {
   const { error: itemsError } = await admin.from("order_items").insert(lines.map((line) => ({ ...line, order_id: order.id })));
   if (itemsError) { await admin.from("orders").update({ status: "cancelled" }).eq("id", order.id); return NextResponse.json({ error: "Bestellpositionen konnten nicht gespeichert werden." }, { status: 502 }); }
   try {
-    const stripe = new Stripe(stripeKey);
+    // Fetch client: Cloudflare Workers have no Node http module.
+    const stripe = new Stripe(stripeKey, { httpClient: Stripe.createFetchHttpClient() });
     const session = await stripe.checkout.sessions.create({
       mode: "payment", customer_email: auth.user.email,
       line_items: [...lines.map((line) => ({ quantity: line.quantity, price_data: { currency, unit_amount: Math.round(line.unit_price * 100), product_data: { name: line.product_title } } })), ...(shipping > 0 ? [{ quantity: 1, price_data: { currency, unit_amount: shipping, product_data: { name: "Versand" } } }] : [])],
       shipping_address_collection: { allowed_countries: ["DE","AT","BE","BG","HR","CY","CZ","DK","EE","ES","FI","FR","GR","HU","IE","IT","LV","LT","LU","MT","NL","PL","PT","RO","SK","SI","SE"] },
+      // CJ needs a phone number for delivery.
+      phone_number_collection: { enabled: true },
       metadata: { order_id: order.id, user_id: auth.user.id, shop: "helpmey" },
-      success_url: (process.env.APP_ORIGIN || new URL(request.url).origin) + "/checkout/success?session_id={CHECKOUT_SESSION_ID}",
-      cancel_url: (process.env.APP_ORIGIN || new URL(request.url).origin) + "/checkout/cancel"
+      success_url: (process.env.APP_ORIGIN || new URL(request.url).origin) + "/?checkout=success#collections",
+      cancel_url: (process.env.APP_ORIGIN || new URL(request.url).origin) + "/?checkout=cancelled#collections"
     });
     const { error: updateError } = await admin.from("orders").update({ provider_reference: session.id }).eq("id", order.id);
     if (updateError || !session.url) throw new Error("Stripe session could not be persisted.");

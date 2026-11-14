@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/security/webhook-events";
 import { emailPaidOrderInvoice } from "@/lib/invoices";
+import { sendPaidOrderToCj } from "@/lib/cj";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,10 +14,15 @@ export async function POST(request: Request) {
   const signature = request.headers.get("stripe-signature");
   if (!secret || !key || !signature) return NextResponse.json({ error: "Stripe webhook is not configured." }, { status: 503 });
   const raw = await request.text();
-  const stripe = new Stripe(key);
+  // Fetch client and Web Crypto: Cloudflare Workers have neither Node http nor sync HMAC.
+  const stripe = new Stripe(key, { httpClient: Stripe.createFetchHttpClient() });
   let event: Stripe.Event;
-  try { event = stripe.webhooks.constructEvent(raw, signature, secret); }
+  try { event = await stripe.webhooks.constructEventAsync(raw, signature, secret, undefined, Stripe.createSubtleCryptoProvider()); }
   catch { return NextResponse.json({ error: "Invalid Stripe signature." }, { status: 400 }); }
+  // The HelpMey Stripe account is shared with SakanVIP and NEXORA, so every endpoint receives all shops'
+  // checkouts. Each shop tags its sessions (metadata.shop) and acknowledges the others without acting.
+  const metadata = (event.data.object as { metadata?: Record<string, string> | null }).metadata;
+  if (event.type.startsWith("checkout.session.") && metadata?.shop !== "helpmey") return NextResponse.json({ received: true, ignored: "other shop" });
   let claimed = false;
   try {
     claimed = await claimWebhookEvent("stripe", event.id, event.type);
@@ -47,6 +53,8 @@ export async function POST(request: Request) {
       });
       if (finalizeError) throw new Error("Order finalization failed.");
       await emailPaidOrderInvoice(orderId);
+      // Never throws for CJ problems: those are held on the order, emailed, and retried by /api/cj/retry.
+      await sendPaidOrderToCj(orderId).catch(err => console.error("CJ hand-off failed:", err instanceof Error ? err.message : err));
     }
     return NextResponse.json({ received: true });
   } catch {
