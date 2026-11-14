@@ -69,6 +69,8 @@ export default function LuxuryStorefront() {
  const [languageOpen,setLanguageOpen]=useState(false);
  const t=words[lang], rtl=lang==="AR";
  const a=accountText[lang]??accountText.EN;
+ // Keep <html lang> in step with the chosen language (screen readers, search engines).
+ useEffect(()=>{document.documentElement.lang=lang.toLowerCase();},[lang]);
  useEffect(()=>{fetch("/api/auth/user",{cache:"no-store"}).then(r=>r.ok?r.json():{user:null}).then(d=>setUser(d.user??null)).catch(()=>setUser(null));
   const params=new URLSearchParams(location.search), status=params.get("newsletter"), auth=params.get("auth"); if(status) setNewsletterMsg((newsletterStatus[status]??newsletterStatus.error)[lang==="DE"?0:1]);
   // Returning from an email confirmation link: open the account window with the result.
