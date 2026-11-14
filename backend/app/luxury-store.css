@@ -564,3 +564,8 @@
  .hm-hero-image{object-fit:contain!important;object-position:center center!important}
 }
 .hm-text-button{align-self:center;min-height:44px;border:0;background:transparent;color:#d7bd8d;font-size:11px;text-decoration:underline;cursor:pointer}.hm-newsletter-note{margin-top:12px;color:#d7bd8d;font-size:12px;line-height:1.6}
+
+/* Hero photo fills the full width (cover). It overrides the earlier "contain" rules, which left dark bars
+   at the sides; the crop stays centred on the couple and the Helpmey shop front. */
+.hm-hero-image{object-fit:cover!important;object-position:center 42%!important}
+@media(max-width:700px){.hm-hero-image{object-position:52% center!important}}
