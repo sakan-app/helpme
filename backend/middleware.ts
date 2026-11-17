@@ -25,11 +25,13 @@ export async function middleware(request: NextRequest) {
   requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("Content-Security-Policy", policy);
   const path = request.nextUrl.pathname;
-  // helpmey.net is the shop's address: pages opened on the workers.dev host move there, so search engines
-  // see one site. API routes stay reachable on both hosts (the Stripe webhook points at workers.dev).
+  // helpmey.net is the shop's address: pages opened on the workers.dev host or on www move there, so search
+  // engines see one site. API routes stay reachable on every host (the Stripe webhook points at workers.dev).
   const canonical = process.env.APP_ORIGIN;
+  const canonicalHost = canonical ? new URL(canonical).host : "";
+  const host = request.nextUrl.hostname;
   if (canonical && (request.method === "GET" || request.method === "HEAD") && !path.startsWith("/api/") &&
-      request.nextUrl.hostname.endsWith(".workers.dev") && new URL(canonical).host !== request.nextUrl.host) {
+      (host.endsWith(".workers.dev") || host === `www.${canonicalHost}`) && canonicalHost !== request.nextUrl.host) {
     return NextResponse.redirect(new URL(path + request.nextUrl.search, canonical), 301);
   }
   const providerWebhook = path.startsWith("/api/webhooks/") || path === "/api/payments/stripe/webhook";
