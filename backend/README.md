@@ -55,7 +55,7 @@ Deploy the `backend/` directory as the project root in a Node.js host such as Ve
 
 ### Cloudflare Workers (current host)
 
-The live shop runs as the Worker `helpme-cf` (https://helpme-cf.sakanapp65.workers.dev) through OpenNext (`open-next.config.ts`, `wrangler.jsonc`). Cloudflare Workers Builds deploys every push to `main`:
+The live shop runs as the Worker `helpme-cf` at https://helpmey.net (pages on https://helpme-cf.sakanapp65.workers.dev redirect there; its API routes, used by the Stripe webhook, still answer) through OpenNext (`open-next.config.ts`, `wrangler.jsonc`). Cloudflare Workers Builds deploys every push to `main`:
 
 - Root directory: `backend`
 - Build command: `npx opennextjs-cloudflare build`

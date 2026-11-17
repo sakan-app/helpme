@@ -20,7 +20,7 @@
   ],
   "vars": {
     // Exact HTTPS origin of this worker; used for auth email links and same-origin checks.
-    "APP_ORIGIN": "https://helpme-cf.sakanapp65.workers.dev",
+    "APP_ORIGIN": "https://helpmey.net",
     "SMTP_HOST": "smtps.udag.de",
     "SMTP_PORT": "465",
     "SMTP_SECURE": "true",

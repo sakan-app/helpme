@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Always put <title>/<meta> in <head>: streamed metadata was missed by Lighthouse and some crawlers.
+  htmlLimitedBots: /.*/,
   // worker-mailer imports cloudflare:sockets; only the Worker build (OpenNext) may bundle it.
   serverExternalPackages: ["worker-mailer"],
   async headers() {
