@@ -569,3 +569,10 @@
    at the sides; the crop stays centred on the couple and the Helpmey shop front. */
 .hm-hero-image{object-fit:cover!important;object-position:center 42%!important}
 @media(max-width:700px){.hm-hero-image{object-position:52% center!important}}
+
+/* Cookie consent banner (components/consent-banner.tsx): accept and decline look the same on purpose. */
+.hm-consent{position:fixed;left:12px;right:12px;bottom:12px;z-index:9999;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;max-width:960px;margin:0 auto;padding:14px 16px;border:1px solid #c9a66d;border-radius:12px;background:#100e0b;color:#f2e6d2;font:14px/1.5 'DM Sans',Arial,sans-serif;box-shadow:0 8px 30px #0009}
+.hm-consent p{margin:0;flex:1 1 320px}
+.hm-consent-actions{display:flex;gap:10px;flex-wrap:wrap}
+.hm-consent-actions button{min-height:44px;padding:0 20px;border:1px solid #c9a66d;border-radius:8px;background:#1b1712;color:#f2e6d2;font:600 14px 'DM Sans',Arial,sans-serif;cursor:pointer}
+.hm-consent-actions button:focus-visible{outline:2px solid #f2e6d2;outline-offset:2px}

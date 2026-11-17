@@ -12,7 +12,7 @@ function securityPolicy(nonce: string): string {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data: https:",
-    "connect-src 'self' https://*.supabase.co https://api.stripe.com https://api-m.paypal.com https://api-m.sandbox.paypal.com https://*.klarna.com",
+    "connect-src 'self' https://*.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://api.stripe.com https://api-m.paypal.com https://api-m.sandbox.paypal.com https://*.klarna.com",
     "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://www.paypal.com https://www.sandbox.paypal.com",
     "form-action 'self'", "base-uri 'self'", "object-src 'none'", "frame-ancestors 'none'", "upgrade-insecure-requests"
   ].join("; ");

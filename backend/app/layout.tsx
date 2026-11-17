@@ -9,6 +9,7 @@ import "@fontsource/dm-sans/500.css";
 import "@fontsource/dm-sans/600.css";
 import "./globals.css";
 import "./luxury-store.css";
+import ConsentBanner from "@/components/consent-banner";
 
 // The middleware CSP uses a per-request nonce, which only reaches pages rendered per request.
 export const dynamic = "force-dynamic";
@@ -51,5 +52,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return <html lang="en"><body>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(storeData).replace(/</g, "\\u003c") }}/>
     {children}
+    <ConsentBanner/>
   </body></html>;
 }
