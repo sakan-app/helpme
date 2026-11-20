@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 
-// Cookie consent: the Google tag GTM-W976JXRM (Google Analytics) loads only after "Accept" (TDDDG § 25 /
+// Cookie consent: Google Analytics (NEXT_PUBLIC_GA_ID, a G-… ID) loads only after "Accept" (TDDDG § 25 /
 // DSGVO Art. 6 (1) a). "Decline" is equally easy; the footer's "Cookie-Einstellungen" button dispatches
 // OPEN_EVENT to show the choice again.
 const KEY = "helpmey_consent_v1";
+// Without a G-… ID the site falls back to the Tag Manager container.
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID ?? "";
 const TAG_ID = "GTM-W976JXRM";
 export const OPEN_EVENT = "helpmey:cookie-settings";
 
@@ -24,10 +26,11 @@ function loadTag() {
   w.dataLayer = w.dataLayer || [];
   w.gtag = function () { w.dataLayer!.push(arguments); };
   w.gtag("js", new Date());
+  if (GA_ID) w.gtag("config", GA_ID, { anonymize_ip: true });
   // Created by this nonce-trusted bundle, so the CSP's 'strict-dynamic' lets it (and what it loads) run.
   const script = document.createElement("script");
   script.async = true;
-  script.src = `https://www.googletagmanager.com/gtm.js?id=${TAG_ID}`;
+  script.src = GA_ID ? `https://www.googletagmanager.com/gtag/js?id=${GA_ID}` : `https://www.googletagmanager.com/gtm.js?id=${TAG_ID}`;
   document.head.appendChild(script);
 }
 
